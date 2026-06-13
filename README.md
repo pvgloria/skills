@@ -9,7 +9,9 @@ npx pvgloria/skills install   # install or update the skills in ~/.claude/skills
 ```
 
 `install` is also update — run it again any time and it copies the latest skills
-into place.
+into place. It installs **everything I use**: my own skills (below) plus the
+third-party ones listed in [`external-skills.json`](external-skills.json), pulled
+from their original repos via the [skills.sh](https://skills.sh) CLI.
 
 ## Skills
 
@@ -37,6 +39,17 @@ convention. The buckets below are the promoted ones; `personal/` is intentionall
 | --- | --- |
 | [`consolidate-memory`](skills/misc/consolidate-memory/SKILL.md) | Tidy up Claude's memory files — merge duplicates, prune stale facts. |
 | [`mentorship`](skills/misc/mentorship/SKILL.md) | People-management and leadership coaching for an engineer growing into a lead role. |
+
+## External skills (not mine)
+
+Skills I use but don't author live in [`external-skills.json`](external-skills.json),
+keyed by their source repo. `install` runs `npx skills add` for each, so they're
+fetched from the original repo and updated with `npx skills update`.
+
+| Repo | Skills |
+| --- | --- |
+| [`chrisbanes/skills`](https://github.com/chrisbanes/skills) | all (Compose + Kotlin) |
+| [`mattpocock/skills`](https://github.com/mattpocock/skills) | `grill-me`, `grill-with-docs`, `handoff` |
 
 ## Adding or changing a skill
 

@@ -4,6 +4,7 @@
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
+const { execFileSync } = require('child_process')
 
 // The skills ship inside this package, so `npx pvgloria/skills` already has them
 // on disk next to this script — no separate clone needed. Install just copies
@@ -12,6 +13,10 @@ const path = require('path')
 const INSTALL_BUCKETS = ['engineering', 'productivity', 'misc', 'personal']
 const SOURCE = path.join(__dirname, '..', 'skills')
 const DEST = path.join(os.homedir(), '.claude', 'skills')
+
+// Third-party skills I use, installed via the skills.sh CLI (npx skills) from
+// their original repos. Value "*" = every skill in the repo; an array = a subset.
+const EXTERNAL = path.join(__dirname, '..', 'external-skills.json')
 
 function isSymlink(p) {
   try {
@@ -55,9 +60,34 @@ function install() {
     installed.push(name)
   }
 
-  console.log(`✓ Installed ${installed.length} skill(s) into ${DEST}`)
+  console.log(`✓ Installed ${installed.length} personal skill(s) into ${DEST}`)
   installed.forEach((s) => console.log('  + ' + s))
   skipped.forEach((s) => console.log('  ! ' + s + ' (skipped: symlink)'))
+
+  installExternal()
+}
+
+function installExternal() {
+  if (!fs.existsSync(EXTERNAL)) return
+
+  const repos = JSON.parse(fs.readFileSync(EXTERNAL, 'utf8'))
+  const names = Object.keys(repos)
+  if (names.length === 0) return
+
+  console.log('\nInstalling external skills via skills.sh…')
+  for (const repo of names) {
+    const sel = repos[repo]
+    const skill = sel === '*' || (Array.isArray(sel) && sel.includes('*')) ? '*' : sel.join(',')
+    console.log(`  → ${repo} (${skill === '*' ? 'all' : skill})`)
+
+    try {
+      execFileSync('npx', ['--yes', 'skills', 'add', repo, '--global', '--skill', skill, '--agent', 'claude-code', '-y'], {
+        stdio: 'inherit',
+      })
+    } catch {
+      console.error(`  ! failed to install ${repo} — run it by hand: npx skills add ${repo}`)
+    }
+  }
 }
 
 const cmd = process.argv[2]
