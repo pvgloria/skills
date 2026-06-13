@@ -1,0 +1,17 @@
+{
+  "name": "pvgloria-skills",
+  "version": "0.1.0",
+  "description": "Personal Claude Code skills — engineering, productivity, and misc tools.",
+  "author": {
+    "name": "pgloria"
+  },
+  "skills": [
+    "./skills/engineering/code-review/",
+    "./skills/engineering/design-coaching/",
+    "./skills/engineering/project-bootstrap/",
+    "./skills/engineering/project-planning/",
+    "./skills/productivity/release-notes/",
+    "./skills/misc/consolidate-memory/",
+    "./skills/misc/mentorship/"
+  ]
+}

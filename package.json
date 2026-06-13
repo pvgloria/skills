@@ -1,0 +1,12 @@
+{
+  "name": "pvgloria-skills",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CLI to install (and update) personal Claude skills",
+  "bin": {
+    "pvgloria-skills": "bin/cli.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
