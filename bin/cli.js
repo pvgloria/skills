@@ -77,11 +77,13 @@ function installExternal() {
   console.log('\nInstalling external skills via skills.sh…')
   for (const repo of names) {
     const sel = repos[repo]
-    const skill = sel === '*' || (Array.isArray(sel) && sel.includes('*')) ? '*' : sel.join(',')
-    console.log(`  → ${repo} (${skill === '*' ? 'all' : skill})`)
+    const all = sel === '*' || (Array.isArray(sel) && sel.includes('*'))
+    const skills = all ? ['*'] : sel
+    const skillArgs = skills.flatMap((s) => ['--skill', s]) // one --skill per name; the CLI doesn't split commas
+    console.log(`  → ${repo} (${all ? 'all' : skills.join(', ')})`)
 
     try {
-      execFileSync('npx', ['--yes', 'skills', 'add', repo, '--global', '--skill', skill, '--agent', 'claude-code', '-y'], {
+      execFileSync('npx', ['--yes', 'skills', 'add', repo, '--global', ...skillArgs, '--agent', 'claude-code', '-y'], {
         stdio: 'inherit',
       })
     } catch {
