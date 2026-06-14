@@ -66,9 +66,11 @@ When this runs as a review of your own work, lead — don't wait to be asked.
   class the team extends, a boundary that leaks a mutable type, a state shape the next dev fills in.
 - Bring the questions you didn't think to ask. Hunt cross-cutting issues proactively, even in code
   that looks clean. You can't flag what you don't see — that's the value here.
-- Check for documented rationale before flagging (PLAN.md, AI.md, ADRs, inline comments). A
-  principled choice with a recorded reason is not a finding — ask before flagging when it could be
-  intentional.
+- Check for documented rationale before flagging (PLAN.md, AI.md, ADRs, inline comments). Documented
+  rationale *downgrades a verdict to an alert-plus-question* — it never suppresses the finding. A
+  shape that breaks a mantra is still worth surfacing even when a doc explains it: the doc itself may
+  be stale, and "the CLAUDE.md says so" is exactly the assumption this lens exists to question. Raise
+  it, name the recorded reason, and ask — don't wave it through.
 - When something non-obvious is shaped *right*, say so. Knowing *why* a safe shape is safe is half
   the lens.
 
@@ -471,4 +473,5 @@ need a fixed safe side (#4 has none) — it needs a real tension to arbitrate.
 ## Defer to the author
 
 Findings are for discussion, not verdicts. Some have documented rationale — check PLAN.md, AI.md,
-ADRs. Present the finding, the principle, and the question; the author decides what to act on.
+ADRs. A recorded reason is context for the question, not a reason to stay silent: present the
+finding, the principle, and the question regardless, and let the author decide what to act on.
