@@ -442,7 +442,11 @@ Structure the findings so the principle sticks, not just the fix:
   wrong, the code is probably unclear.
 - **Findings** — by concern, leading with the specific code. For each: the misuse it invites, the
   safer shape, the *mantra* underneath, and the *question* you'd ask to arbitrate it. Note the impact
-  (real trap / shape smell / nitpick).
+  (real trap / shape smell / nitpick). The safer shape must be *concrete to the code under review*,
+  not a generic snippet, and offered as an option to consider ("consider shaping it as…") — never a
+  prescribed patch; where more than one resolution is valid, name the options and let the question
+  decide. The proposal stays tied to the question — this skill coaches the fork, it doesn't hand over
+  a fix (that's `code-review`'s job).
 - **What's done well** — only non-obvious things a less-experienced dev would get wrong. Not a praise
   sandwich.
 
