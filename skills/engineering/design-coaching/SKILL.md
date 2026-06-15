@@ -1,6 +1,6 @@
 ---
 name: design-coaching
-description: 'Coach your own design judgment on Android/Kotlin/Compose code — evaluate the shape you are building by reasoning from design principles in tension, not by matching a catalog of bad forms. Use when weighing a design fork — inheritance vs composition, what to expose at a boundary, a value class vs a raw primitive, a data class vs a sealed hierarchy for state, where to validate input — when you ask "is this the right shape" or "where could this be misused", or for a design pass before committing. Inward, for your own growth; to write review comments on a teammate''s PR, use the code-review skill instead.'
+description: 'Coach design judgment on Android/Kotlin/Compose code — evaluate the shape by reasoning from design principles in tension, not by matching a catalog of bad forms, and teach the author to see the forks themselves. Use when reviewing code (often the user''s own) to help them design better, or when weighing a design fork — inheritance vs composition, what to expose at a boundary, a value class vs a raw primitive, a data class vs a sealed hierarchy for state, where to validate input — when you ask "is this the right shape" or "where could this be misused", or for a design pass before committing. Coaches the author toward better judgment, not just fixes; to write review comments on a teammate''s PR, use the code-review skill instead.'
 ---
 
 # Design Coaching
@@ -86,7 +86,9 @@ When this runs as a review of your own work, lead — don't wait to be asked.
 
 Not for: routine feature code, private single-use helpers, or anywhere there's no realistic, costly
 misuse — those stay silent. When the goal is to write review comments on a *teammate's* PR, use the
-`code-review` skill; this skill's coaching is for your own code and designs.
+`code-review` skill. This skill's job is to grow the design judgment of whoever wrote the code — usually
+the user reviewing their own work, sometimes you reviewing a fresh design — so it always ends by
+teaching the author, not just listing fixes.
 
 ## The catalog — mantras, in tension
 
@@ -450,20 +452,27 @@ Structure the findings so the principle sticks, not just the fix:
 - **What's done well** — only non-obvious things a less-experienced dev would get wrong. Not a praise
   sandwich.
 
-## Design coaching
+## Coaching the author
 
-After the findings, add a **"Design coaching"** section — your eyes only, never part of the code or
-commit. Keep it to 3–5 bullets, specific to this work, about *how you reached for the shape*, not the
-shape itself.
+After the findings, add a short **coaching** section addressed to the person who wrote the code — they
+want to *learn to design better*, not just get this file fixed. (When *you* authored the design, the
+same section turns inward as honest self-critique. Default to addressing the author you're reviewing.)
 
-- **The fork you didn't see** — which tension did you walk past, and what's the question you'd ask
-  yourself by default next time?
-- **Reflex shapes** — did you reach for inheritance, an exposed mutable, or a blanket state rule out
-  of habit? Patterns in your own instinct are the highest-value thing to surface.
-- **Slogan check** — did you (or would you) apply a mantra as a reflex where its counter-mantra
-  actually wins? Over-applying *one* side of a tension is the core failure mode.
-- **Calibration** — did you weight a nitpick like a trap, or wave past a real one? Severity judgment
-  is the skill.
+This is **not a recap of the findings**. Findings repair *this* code; coaching hands over the
+*transferable judgment* — the fork they'd walk past again, the question to internalise before writing,
+the reflex visible across their work. If a bullet only restates a finding, cut it. 3–5 bullets,
+specific to this work, and it should sting a little — comfortable coaching taught nothing. Never goes
+in the code or the commit.
+
+- **The fork you walked past** — the tension that was live here and which way it leaned, framed as the
+  question to ask *before* writing it next time, not the verdict after.
+- **A reflex in your instinct** — a shape reached for out of habit (inheritance for reuse, an exposed
+  mutable, a blanket state rule, a stringly-typed payload) that recurs across the code, not only here.
+  Naming the *pattern* is worth more than catching the instance.
+- **Slogan check** — a mantra applied (or about to be) as a reflex where its counter-mantra wins.
+  Over-applying *one* side of a tension is the core failure mode.
+- **Calibration** — where the author's own severity instinct is off: a nitpick defended like a trap,
+  or a real trap shrugged away. Severity judgment is half the skill.
 
 ## Growing this skill
 
