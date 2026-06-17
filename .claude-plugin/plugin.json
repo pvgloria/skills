@@ -10,6 +10,7 @@
     "./skills/engineering/debug/",
     "./skills/engineering/design-coaching/",
     "./skills/engineering/implement/",
+    "./skills/engineering/performance/",
     "./skills/engineering/project-bootstrap/",
     "./skills/engineering/project-planning/",
     "./skills/engineering/refactor/",
