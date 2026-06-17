@@ -70,16 +70,13 @@ block:
 
 ## Phase 3 — Execution
 
-- After each block, **stop and validate** before starting the next.
-- **Validation is Pedro's review** against the defaults above. Green tests are necessary but
-  **not sufficient** — a passing test confirms behaviour, not architectural placement. A
-  perfectly testable ViewModel can still hold logic that belongs in a use case. So tests
-  don't close the loop; Pedro's eyes do.
-- **Always get Pedro's confirmation before each commit.** Don't commit on your own initiative.
+Hand the saved plan to [`implement`](../implement/SKILL.md). It owns execution: block by
+block, auto-review each step, stop for Pedro's validation, and never commit on its own
+initiative. The grill decisions in the plan are the bar it validates against.
 
 ## What this skill is not
 
-This is the planning *process*. It does not re-teach Compose, Flow, or Kotlin rules — the
-`compose-*` and `kotlin-*` skills own those and are the authority when writing and validating
-the actual code. Reach for them during Phase 2 (to shape the plan correctly) and Phase 3 (to
-validate), not instead of this skill.
+This is the planning *process*, up to a saved plan — execution lives in `implement`. It also
+does not re-teach Compose, Flow, or Kotlin rules — the `compose-*` and `kotlin-*` skills own
+those and are the authority. Reach for them during Phase 2 to shape the plan correctly, not
+instead of this skill.

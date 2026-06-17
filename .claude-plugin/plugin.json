@@ -8,6 +8,7 @@
   "skills": [
     "./skills/engineering/code-review/",
     "./skills/engineering/design-coaching/",
+    "./skills/engineering/implement/",
     "./skills/engineering/project-bootstrap/",
     "./skills/engineering/project-planning/",
     "./skills/productivity/release-notes/",

@@ -24,6 +24,7 @@ convention. The buckets below are the promoted ones; `personal/` is intentionall
 | --- | --- |
 | [`code-review`](skills/engineering/code-review/SKILL.md) | Write thoughtful, leadership-grade reviews for Android PRs. |
 | [`design-coaching`](skills/engineering/design-coaching/SKILL.md) | Coach your design judgment — shape Android/Kotlin code so a less-experienced teammate can't easily misuse it. |
+| [`implement`](skills/engineering/implement/SKILL.md) | Drive an agreed task to a production-grade bar — block by block, auto-review, stop to validate, never auto-commit. |
 | [`project-planning`](skills/engineering/project-planning/SKILL.md) | Plan a project or feature before any code — roadmap, grill, a saved plan. |
 | [`project-bootstrap`](skills/engineering/project-bootstrap/SKILL.md) | Stand up a brand-new project through an interview, one decision at a time. |
 
