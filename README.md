@@ -27,6 +27,7 @@ convention. The buckets below are the promoted ones; `personal/` is intentionall
 | [`implement`](skills/engineering/implement/SKILL.md) | Drive an agreed task to a production-grade bar — block by block, auto-review, stop to validate, never auto-commit. |
 | [`project-planning`](skills/engineering/project-planning/SKILL.md) | Plan a project or feature before any code — roadmap, grill, a saved plan. |
 | [`project-bootstrap`](skills/engineering/project-bootstrap/SKILL.md) | Stand up a brand-new project through an interview, one decision at a time. |
+| [`refactor`](skills/engineering/refactor/SKILL.md) | Inherit unfamiliar code and change it safely — map it first, characterize with tests, refactor in behaviour-preserving steps. |
 
 ### Productivity — daily non-code workflow tools
 
