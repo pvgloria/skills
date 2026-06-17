@@ -17,7 +17,8 @@ wrong for the case in front of you, say so and propose the refined version.
 Don't refactor what you can't explain. Before any change, map the ground:
 
 - **Architecture through the layers** — where does each piece sit? UI → presentation →
-  domain → data. Name the modules and how they depend on each other.
+  domain → data (the [`architecture`](../architecture/SKILL.md) skill holds the target shape).
+  Name the modules and how they depend on each other.
 - **Data flow** — trace a representative path end to end: holder → use case → repository →
   source, and back. The direction of dependencies tells you what's load-bearing.
 

@@ -28,15 +28,15 @@ One of two entry points, both fine:
 `goal = {the agreed spec}`. Keep going until the architecture **and** the result meet the
 bar — not just until it runs. A thing that compiles is not a thing that's done.
 
-Work in **small blocks** — one commit-sized bucket at a time (the commit rules in CLAUDE.md
-already define the size: one logical change). Don't batch unrelated changes into one block.
+Work in **small blocks** — one commit-sized bucket at a time (one logical change; `commit-style`
+owns the message convention). Don't batch unrelated changes into one block.
 
 After each block:
 
-- **Auto-review the change** against the architecture defaults before showing it. Placement
-  matters, not just green tests — a passing test confirms behaviour, not that the logic lives
-  in the right layer. The `compose-*` and `kotlin-*` skills are the authority on the actual
-  code; reach for them here.
+- **Auto-review the change** against the architecture defaults — the [`architecture`](../architecture/SKILL.md)
+  skill owns those. Placement matters, not just green tests — a passing test confirms
+  behaviour, not that the logic lives in the right layer. The `compose-*` / `kotlin-*` /
+  `data-layer` skills are the authority on the actual code; reach for them here.
 - **Stop for Pedro's validation.** His eyes close the loop, not the test suite.
 - **Never commit on your own initiative.** Suggest the message; he runs the commit.
 

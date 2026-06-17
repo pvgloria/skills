@@ -7,7 +7,8 @@ description: The process for planning a new project or feature before writing co
 
 This skill captures *how Pedro plans*, so that planning produces structure that is already
 right — instead of producing something that his review then has to correct. The whole point
-is to think with the target architecture in mind from the start.
+is to think with the target architecture in mind from the start — the [`architecture`](../architecture/SKILL.md)
+skill holds those defaults.
 
 A note on tone before anything else: everything here is a **principle, not a rigid rule**.
 Rigid never/always rules misfire on exactly the edge cases that planning exists to catch.

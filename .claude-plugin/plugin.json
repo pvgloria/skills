@@ -6,7 +6,10 @@
     "name": "pgloria"
   },
   "skills": [
+    "./skills/engineering/architecture/",
     "./skills/engineering/code-review/",
+    "./skills/engineering/commit-style/",
+    "./skills/engineering/data-layer/",
     "./skills/engineering/debug/",
     "./skills/engineering/design-coaching/",
     "./skills/engineering/implement/",
