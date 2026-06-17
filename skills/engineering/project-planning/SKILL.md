@@ -64,8 +64,10 @@ block:
 **Save the plan as a file in the repo.** It has two parts, and both matter:
 
 1. **The grill decisions, as bullet points** — the *what we agreed*: architecture, models,
-   approaches, and the *why* behind them. This is what survives across sessions; without it
-   the plan is a to-do list with no reasoning.
+   approaches, and the *why* behind them, taken as far as pseudo-code of one possible shape
+   (the domain model, the interfaces between layers). It sketches a solution, not a frozen
+   contract — the internals emerge while building. This is what survives across sessions;
+   without it the plan is a to-do list with no reasoning.
 2. **The commit sequence** — the *how we'll build it*, derived from those decisions.
 
 ## Phase 3 — Execution
