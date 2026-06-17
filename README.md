@@ -30,6 +30,7 @@ convention. The buckets below are the promoted ones; `personal/` is intentionall
 | [`project-planning`](skills/engineering/project-planning/SKILL.md) | Plan a project or feature before any code — roadmap, grill, a saved plan. |
 | [`project-bootstrap`](skills/engineering/project-bootstrap/SKILL.md) | Stand up a brand-new project through an interview, one decision at a time. |
 | [`refactor`](skills/engineering/refactor/SKILL.md) | Inherit unfamiliar code and change it safely — map it first, characterize with tests, refactor in behaviour-preserving steps. |
+| [`ui-components`](skills/engineering/ui-components/SKILL.md) | Build UI reuse-first — discover the design system, reuse or compose it, author new only when nothing fits. |
 
 ### Productivity — daily non-code workflow tools
 
