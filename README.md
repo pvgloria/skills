@@ -23,6 +23,7 @@ convention. The buckets below are the promoted ones; `personal/` is intentionall
 | Skill | What it does |
 | --- | --- |
 | [`code-review`](skills/engineering/code-review/SKILL.md) | Write thoughtful, leadership-grade reviews for Android PRs. |
+| [`debug`](skills/engineering/debug/SKILL.md) | Chase a bug to its root cause — reproduce with a failing test, fix at the root, leave a regression guard. |
 | [`design-coaching`](skills/engineering/design-coaching/SKILL.md) | Coach your design judgment — shape Android/Kotlin code so a less-experienced teammate can't easily misuse it. |
 | [`implement`](skills/engineering/implement/SKILL.md) | Drive an agreed task to a production-grade bar — block by block, auto-review, stop to validate, never auto-commit. |
 | [`project-planning`](skills/engineering/project-planning/SKILL.md) | Plan a project or feature before any code — roadmap, grill, a saved plan. |
