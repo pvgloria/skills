@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Drive an agreed task to a production-grade bar — block by block, auto-review each step, stop for Pedro's validation before every commit. Use when executing a saved plan from project-planning, or when handed a spec to build directly ("implement this", "build this", "vamos implementar"). The execution counterpart to project-planning; it owns the stop-and-validate / no-auto-commit rules.
+description: Drive an agreed task to a production-grade bar — block by block, auto-review each step, stop for Pedro's validation before every commit. Use when executing a saved plan from feature-planning, or when handed a spec to build directly ("implement this", "build this", "vamos implementar"). The execution counterpart to feature-planning; it owns the stop-and-validate / no-auto-commit rules.
 ---
 
 # Implement
@@ -17,7 +17,7 @@ mechanically.
 
 One of two entry points, both fine:
 
-- **A saved plan** from [`project-planning`](../project-planning/SKILL.md) — the commit
+- **A saved plan** from [`feature-planning`](../feature-planning/SKILL.md) — the commit
   sequence is your block list, and the grill decisions are the bar you validate against.
 - **A task handed directly** — a spec Pedro gives you here. If it's substantial and the
   architecture isn't yet pinned down, say so and suggest grilling first rather than building
@@ -54,6 +54,6 @@ change as a whole: seams between blocks, anything that drifted, dead scaffolding
 
 ## What this skill is not
 
-It is not planning — if the approach isn't agreed yet, that's `project-planning` /
+It is not planning — if the approach isn't agreed yet, that's `feature-planning` /
 `grill-me` / `grill-with-docs`, not this. It is not a code-rules reference — the `compose-*`
 and `kotlin-*` skills own those and are the authority when you write and validate the code.

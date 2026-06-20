@@ -1,9 +1,9 @@
 ---
-name: project-planning
+name: feature-planning
 description: The process for planning a new project or feature before writing code — roadmap, grill, a saved plan that conforms to architecture defaults, then block-by-block execution. Use when planning a project or feature, structuring work before coding, or mentions "let's plan this", "plan this feature", "how should we structure this".
 ---
 
-# Project Planning
+# Feature Planning
 
 This skill captures *how Pedro plans*, so that planning produces structure that is already
 right — instead of producing something that his review then has to correct. The whole point

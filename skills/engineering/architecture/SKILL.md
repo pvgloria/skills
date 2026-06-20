@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: The layered-architecture defaults for Android/Kotlin app code — dependency direction, where logic and state live, how repositories and use cases are shaped. Use when deciding where code belongs, structuring layers, or adding a repository or use case ("where does this go", "which layer", "add a repository/use case"). The implement, refactor, and project-planning skills validate against these defaults.
+description: The layered-architecture defaults for Android/Kotlin app code — dependency direction, where logic and state live, how repositories and use cases are shaped. Use when deciding where code belongs, structuring layers, or adding a repository or use case ("where does this go", "which layer", "add a repository/use case"). The implement, refactor, and feature-planning skills validate against these defaults.
 ---
 
 # Architecture

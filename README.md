@@ -28,9 +28,9 @@ convention. The buckets below are the promoted ones; `personal/` is intentionall
 | [`data-layer`](skills/engineering/data-layer/SKILL.md) | Android data-layer defaults — serialization, mapper testing, and the network boundary (DTOs at the edge, distrust the wire). |
 | [`debug`](skills/engineering/debug/SKILL.md) | Chase a bug to its root cause — reproduce with a failing test, fix at the root, leave a regression guard. |
 | [`design-coaching`](skills/engineering/design-coaching/SKILL.md) | Coach your design judgment — shape Android/Kotlin code so a less-experienced teammate can't easily misuse it. |
+| [`feature-planning`](skills/engineering/feature-planning/SKILL.md) | Plan a project or feature before any code — roadmap, grill, a saved plan. |
 | [`implement`](skills/engineering/implement/SKILL.md) | Drive an agreed task to a production-grade bar — block by block, auto-review, stop to validate, never auto-commit. |
 | [`performance`](skills/engineering/performance/SKILL.md) | Optimize speed/memory the disciplined way — measure first, fix the proven bottleneck, verify the win against a baseline. |
-| [`project-planning`](skills/engineering/project-planning/SKILL.md) | Plan a project or feature before any code — roadmap, grill, a saved plan. |
 | [`project-bootstrap`](skills/engineering/project-bootstrap/SKILL.md) | Stand up a brand-new project through an interview, one decision at a time. |
 | [`refactor`](skills/engineering/refactor/SKILL.md) | Inherit unfamiliar code and change it safely — map it first, characterize with tests, refactor in behaviour-preserving steps. |
 | [`ui-components`](skills/engineering/ui-components/SKILL.md) | Build UI reuse-first — discover the design system, reuse or compose it, author new only when nothing fits. |
