@@ -31,5 +31,5 @@ metadata:                                   # any custom key-value pairs
 - Descriptions up to 1024 characters
 
 ## Forbidden
-- Angle brackets (`<` `>`) — frontmatter enters the system prompt; this blocks instruction injection
+- Angle brackets (`<` `>`)
 - `claude` or `anthropic` in the name — reserved
