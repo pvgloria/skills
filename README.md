@@ -19,10 +19,14 @@ Drop the `/tree/main/skills/<bucket>` suffix to take everything at once:
 npx -y skills add pvgloria/skills -g
 ```
 
-`-g` installs at user level, into `~/.agents/skills/` with a symlink from each agent's own
-directory (`~/.claude/skills/` for Claude Code). Without `-g` the skills land in the current
-project instead. The CLI asks which agents to target; `--agent claude-code` answers that up
-front, and `-y` skips the remaining prompts.
+`-g` installs at user level, into each agent's own directory (`~/.claude/skills/` for Claude
+Code); without it the skills land in the current project instead.
+
+Run it interactively and the CLI asks two things: which agents to target, and whether to
+symlink. Symlinking keeps one canonical copy under `~/.agents/skills/` and points every agent
+at it, which is worth having once more than one agent is installed. Answering up front with
+`--agent claude-code -y` skips both questions — and skipping the second one means copies, not
+symlinks.
 
 Individual skills work too, if a whole bucket is more than you want:
 
