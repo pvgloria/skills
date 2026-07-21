@@ -1,7 +1,8 @@
 # Repository conventions
 
-This repo holds personal Claude Code skills plus a small CLI to install them. Skills are
-organized into **bucket folders** under `skills/`, and each skill is a folder with a `SKILL.md`:
+This repo holds personal Claude Code skills, distributed with the [skills.sh](https://skills.sh)
+CLI. Skills are organized into **bucket folders** under `skills/`, and each skill is a folder
+with a `SKILL.md`:
 
 ```
 skills/<bucket>/<skill>/SKILL.md
@@ -16,12 +17,18 @@ skills/<bucket>/<skill>/SKILL.md
 | `misc/`         | kept around but rarely used          |
 | `personal/`     | tied to my own setup, not promoted   |
 
+A bucket is also the unit of installation — `skills add <repo>/tree/main/skills/<bucket>`
+installs that folder and nothing else. Which bucket a skill lands in therefore decides who
+can pull it in isolation, not just where it's indexed.
+
 ## Visibility rules
 
-- Every skill in `engineering/`, `productivity/`, or `misc/` **must** have **both**:
-  - a reference in the top-level `README.md`, with the skill name linked to its `SKILL.md`, and
-  - an entry in `.claude-plugin/plugin.json` (the `skills` array — one path per skill).
-- Skills in `personal/` **must not** appear in either the top-level `README.md` or `plugin.json`.
+- Every skill in `engineering/`, `productivity/`, or `misc/` **must** be referenced in the
+  top-level `README.md`, with the skill name linked to its `SKILL.md`.
+- Skills in `personal/` **must not** appear in the top-level `README.md`.
+
+Neither rule affects what gets installed. The CLI finds skills by walking the tree, so every
+skill in the repo is installable whether or not it's indexed anywhere — `personal/` included.
 
 ## Where each skill is listed
 
@@ -37,7 +44,7 @@ and duplicating the one-liner in both would just drift.
 ## When adding, moving, or removing a skill
 
 1. Place it at `skills/<bucket>/<skill>/SKILL.md`.
-2. If it lands in `engineering/`, `productivity/`, or `misc/`: add it to the top-level `README.md`
-   (linked) **and** to `plugin.json`. If it lands in `personal/`: keep it out of both, and add it
-   to `skills/personal/README.md` instead.
+2. If it lands in `engineering/`, `productivity/`, or `misc/`: add it to the top-level `README.md`,
+   linked. If it lands in `personal/`: keep it out of there, and add it to
+   `skills/personal/README.md` instead.
 3. Moving a skill across buckets means re-checking step 2 for both the old and new bucket.

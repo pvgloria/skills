@@ -92,6 +92,10 @@ every frontmatter field.
 
 Placement and indexing follow the project `CLAUDE.md` (the authority). In short:
 - Pick the bucket: `engineering/` (code work), `productivity/` (non-code workflow), `misc/` (rarely used), `personal/` (own setup, not promoted).
-- `engineering` / `productivity` / `misc` → add to the top-level `README.md` **and** `plugin.json`.
-- `personal` → add to `skills/personal/README.md` only; keep it out of both the top-level README and `plugin.json`.
+- `engineering` / `productivity` / `misc` → add to the top-level `README.md`.
+- `personal` → add to `skills/personal/README.md` only; keep it out of the top-level README.
 - Each skill is listed exactly once. Moving across buckets means re-checking both indexes.
+
+Indexing is presentation, not distribution: the skills.sh CLI installs by walking the tree, so a
+new skill is installable the moment it's pushed, listed or not. The bucket is what people install
+(`skills add <repo>/tree/main/skills/<bucket>`), so pick it for who should get the skill.

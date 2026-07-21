@@ -1,22 +1,54 @@
 # skills
 
-My personal Claude Code skills, plus a tiny CLI to install and update them.
+My personal Claude Code skills, installed with the [skills.sh](https://skills.sh) CLI.
 
-## Quickstart
+## Install
+
+Skills are grouped into buckets, and a bucket is the unit you install — point the CLI at
+one and you get its skills and nothing else:
 
 ```bash
-npx pvgloria/skills install   # install or update the skills in ~/.claude/skills
+npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/engineering -g
+npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/productivity -g
+npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/misc -g
 ```
 
-`install` is also update — run it again any time and it copies the latest skills
-into place. It installs **everything I use**: my own skills (below) plus the
-third-party ones listed in [`external-skills.json`](external-skills.json), pulled
-from their original repos via the [skills.sh](https://skills.sh) CLI.
+Drop the `/tree/main/skills/<bucket>` suffix to take everything at once:
+
+```bash
+npx -y skills add pvgloria/skills -g
+```
+
+`-g` installs at user level, into `~/.agents/skills/` with a symlink from each agent's own
+directory (`~/.claude/skills/` for Claude Code). Without `-g` the skills land in the current
+project instead. The CLI asks which agents to target; `--agent claude-code` answers that up
+front, and `-y` skips the remaining prompts.
+
+Individual skills work too, if a whole bucket is more than you want:
+
+```bash
+npx -y skills add pvgloria/skills -g -s debug -s refactor
+```
+
+`personal/` is installable the same way, but it's tied to my own setup and isn't listed below:
+
+```bash
+npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/personal -g
+```
+
+## Update
+
+One command refreshes everything the CLI installed — these skills and the third-party ones
+alike:
+
+```bash
+npx skills update -g
+npx skills list       # what's installed, and where it came from
+```
+
+The record of what you have lives in `~/.agents/.skill-lock.json`, written by the CLI.
 
 ## Skills
-
-Skills live in bucket folders under `skills/` — see [CLAUDE.md](CLAUDE.md) for the
-convention. The buckets below are the promoted ones; `personal/` is intentionally not listed here.
 
 ### Engineering — daily code work
 
@@ -51,18 +83,20 @@ convention. The buckets below are the promoted ones; `personal/` is intentionall
 
 ## External skills (not mine)
 
-Skills I use but don't author live in [`external-skills.json`](external-skills.json),
-keyed by their source repo. `install` runs `npx skills add` for each, so they're
-fetched from the original repo and updated with `npx skills update`.
+Skills I use but don't author, installed straight from their own repos:
 
-| Repo | Skills |
-| --- | --- |
-| [`chrisbanes/skills`](https://github.com/chrisbanes/skills) | all (Compose + Kotlin) |
-| [`mattpocock/skills`](https://github.com/mattpocock/skills) | `grill-me`, `grill-with-docs`, `handoff` |
+```bash
+# Compose + Kotlin — the whole repo
+npx -y skills add chrisbanes/skills -g -s '*'
+
+npx -y skills add mattpocock/skills -g \
+  -s grilling -s grill-me -s grill-with-docs -s handoff -s domain-modeling
+```
+
+After that they update along with everything else through `npx skills update -g`.
 
 ## Adding or changing a skill
 
-Skills are organized into buckets under `skills/<bucket>/<skill>/`. See [CLAUDE.md](CLAUDE.md)
-for the full convention — which buckets are promoted, and the rule that every promoted skill is
-referenced here **and** in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json). After
-editing, push to `main`, then run `npx pvgloria/skills install` again.
+Skills live at `skills/<bucket>/<skill>/SKILL.md`. See [CLAUDE.md](CLAUDE.md) for the full
+convention — which buckets are promoted, and the rule that every promoted skill is referenced
+here. Push to `main`, then `npx skills update -g` to pull the change onto a machine.

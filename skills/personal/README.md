@@ -1,7 +1,12 @@
 # personal
 
-Tied to my own setup, not promoted — intentionally absent from the top-level README and
-`plugin.json`.
+Tied to my own setup, not promoted — intentionally absent from the top-level README. Being
+unlisted isn't the same as being unpublished: this bucket installs like any other, and
+`skills add pvgloria/skills` (no bucket path) pulls it in along with the rest.
+
+```bash
+npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/personal -g
+```
 
 | Skill | What it does |
 | --- | --- |

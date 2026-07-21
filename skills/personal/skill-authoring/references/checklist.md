@@ -29,5 +29,5 @@ Run through this when creating or revising a skill.
 
 ## Registration
 - [ ] Listed exactly once in the correct index
-- [ ] `engineering`/`productivity`/`misc` → top-level `README.md` **and** `plugin.json`
-- [ ] `personal` → `skills/personal/README.md` only, absent from both top-level README and `plugin.json`
+- [ ] `engineering`/`productivity`/`misc` → top-level `README.md`
+- [ ] `personal` → `skills/personal/README.md` only, absent from the top-level README
