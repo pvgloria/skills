@@ -36,8 +36,15 @@ npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/personal -
 `-g` installs for every project, into each agent's own directory (`~/.claude/skills/` for
 Claude Code). Drop it to install into the current project instead.
 
-Run it without `-y` and the CLI asks which agents to target and whether to symlink. Answering
-up front with `--agent claude-code -y` skips both — and skipping the symlink one means copies.
+Run it without `-y` and the CLI prompts for the scope, the agents to install to, which skills
+to take, and symlink vs copy. To answer all of that up front and take the whole bucket:
+
+```bash
+npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/engineering -g -s '*' --agent claude-code
+```
+
+`-s '*'` is what makes it the whole bucket rather than a picker. Answering the method prompt
+this way means copies, not symlinks.
 
 ### Update skills
 
