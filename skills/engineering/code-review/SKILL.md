@@ -93,5 +93,5 @@ After the review, add a **"Review coaching"** section — your eyes only, never 
 - Don't rewrite the code for the author — suggest the fix, they implement it.
 - Don't review code outside the diff (unless it introduces an obvious inconsistency with an adjacent pattern).
 - Don't comment on what a linter should catch.
-- Don't generate praise to soften criticism — the response-style skill rejects praise sandwiches.
+- Don't generate praise to soften criticism, or sandwich a problem between two compliments.
 - Don't add motivational closings or sign-offs.

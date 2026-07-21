@@ -82,6 +82,7 @@ npx skills list
 
 | Skill | Description |
 |-------|-------------|
+| [`leadership-messages`](skills/productivity/leadership-messages/SKILL.md) | Draft team updates, recognition, and bad news as a lead — frameworks, templates, and the language to keep out. |
 | [`release-notes`](skills/productivity/release-notes/SKILL.md) | Turn a changelog into Play / App Store release notes. |
 
 ## Misc skills
@@ -89,7 +90,6 @@ npx skills list
 | Skill | Description |
 |-------|-------------|
 | [`consolidate-memory`](skills/misc/consolidate-memory/SKILL.md) | Tidy up Claude's memory files — merge duplicates, prune stale facts. |
-| [`mentorship`](skills/misc/mentorship/SKILL.md) | People-management and leadership coaching for an engineer growing into a lead role. |
 
 ## External skills (not mine)
 

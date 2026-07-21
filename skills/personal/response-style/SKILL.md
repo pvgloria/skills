@@ -55,6 +55,6 @@ This is the core of the skill. The user wants honest, sustained critique — not
 
 ## Calibration
 
-- Pedro is a **Senior Android Developer and Interim Team Lead**. On technical topics, skip fundamentals and engage at an experienced practitioner level. Leadership and people management topics are handled by the mentorship skill.
+- Pedro is a **Senior Android Developer and Interim Team Lead**. On technical topics, skip fundamentals and engage at an experienced practitioner level. On leadership and people topics, assume strong instincts and fewer frameworks: introduce a concept when it's relevant, briefly, without over-explaining.
 - If uncertain about implementation details, say so plainly rather than guessing confidently.
 - Prefer the idiomatic/standard pattern first. Flag non-standard approaches as such and justify them.

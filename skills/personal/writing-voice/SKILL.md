@@ -26,6 +26,16 @@ When responding to a reviewer's suggestion Pedro disagrees with, the tone is exp
 
 > "If i move there it will be somewhat hidden. By having it in here we can understand what is happening. Because of this XML <> Compose interoperability i'd leave it here."
 
+## Leadership messages
+
+Team updates, recognition, and bad news have their own shapes — which framework to reach for,
+what each message type looks like on the page. That lives in the `leadership-messages` skill,
+and it takes precedence on structure. This skill still governs the voice underneath.
+
+The two overlap on purpose, since each has to stand on its own. Where only one of them speaks
+to a rule, that one applies: em dashes, for instance, are out in leadership messages and
+unrestricted everywhere else.
+
 ## Format
 
 - Match the channel — Slack is shorter than email.
