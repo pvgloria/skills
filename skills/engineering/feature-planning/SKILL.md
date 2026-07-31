@@ -74,8 +74,8 @@ block:
 ## Phase 3 — Execution
 
 Hand the saved plan to [`implement`](../implement/SKILL.md). It owns execution: block by
-block, auto-review each step, stop for Pedro's validation, and never commit on its own
-initiative. The grill decisions in the plan are the bar it validates against.
+block, auto-review each step, and stop for Pedro's validation. The grill decisions in the plan
+are the bar it validates against.
 
 ## What this skill is not
 

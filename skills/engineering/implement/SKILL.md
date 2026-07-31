@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Drive an agreed task to a production-grade bar — block by block, auto-review each step, stop for Pedro's validation before every commit. Use when executing a saved plan from feature-planning, or when handed a spec to build directly ("implement this", "build this", "vamos implementar"). The execution counterpart to feature-planning; it owns the stop-and-validate / no-auto-commit rules.
+description: Drive an agreed task to a production-grade bar — block by block, auto-review each step, stop for Pedro's validation before every commit. Use when executing a saved plan from feature-planning, or when handed a spec to build directly ("implement this", "build this", "vamos implementar"). The execution counterpart to feature-planning; it owns the stop-and-validate rule.
 ---
 
 # Implement
@@ -38,7 +38,8 @@ After each block:
   behaviour, not that the logic lives in the right layer. The `compose-*` / `kotlin-*` /
   `data-layer` skills are the authority on the actual code; reach for them here.
 - **Stop for Pedro's validation.** His eyes close the loop, not the test suite.
-- **Never commit on your own initiative.** Suggest the message; he runs the commit.
+- **Suggest the commit message; running it is the project's call** — [`commit-style`](../commit-style/SKILL.md)
+  owns that rule. Absent a grant in the project's `CLAUDE.md`, don't commit.
 
 ## Progress tracking
 
