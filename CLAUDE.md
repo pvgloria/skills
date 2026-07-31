@@ -48,3 +48,8 @@ and duplicating the one-liner in both would just drift.
    linked. If it lands in `personal/`: keep it out of there, and add it to
    `skills/personal/README.md` instead.
 3. Moving a skill across buckets means re-checking step 2 for both the old and new bucket.
+
+## Commits
+
+Claude runs commits in this repo — commit directly instead of proposing the message and
+waiting. Pushing is not covered: never push, force-push, or rewrite history.
