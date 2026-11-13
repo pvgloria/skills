@@ -77,6 +77,7 @@ npx skills list
 | [`performance`](skills/engineering/performance/SKILL.md) | Optimize speed/memory the disciplined way — measure first, fix the proven bottleneck, verify against a baseline. |
 | [`project-bootstrap`](skills/engineering/project-bootstrap/SKILL.md) | Stand up a brand-new project through an interview, one decision at a time. |
 | [`refactor`](skills/engineering/refactor/SKILL.md) | Change unfamiliar code safely — map it first, characterize with tests, refactor in behaviour-preserving steps. |
+| [`review-acceptance`](skills/engineering/review-acceptance/SKILL.md) | Review a PR against its step — every acceptance criterion met and tested, nothing outside the scope. Loaded by the `reviewer-acceptance` agent. |
 | [`ui-components`](skills/engineering/ui-components/SKILL.md) | Build UI reuse-first — discover the design system, reuse or compose it, author new only when nothing fits. |
 
 ## Productivity skills
@@ -91,6 +92,48 @@ npx skills list
 | Skill | Description |
 |-------|-------------|
 | [`consolidate-memory`](skills/misc/consolidate-memory/SKILL.md) | Tidy up Claude's memory files — merge duplicates, prune stale facts. |
+
+## Agents
+
+Claude Code subagent definitions live in [`agents/`](agents/), one file per agent. The reviewer
+agents are the ones [`coo`](skills/engineering/coo/SKILL.md) launches by name on each step's PR:
+each is read-only, preloads its own `review-<area>` skill, and replies with a verdict and
+findings. See [CLAUDE.md](CLAUDE.md) for the convention.
+
+| Agent | Area | Skills |
+|-------|------|--------|
+| [`reviewer-acceptance`](agents/reviewer-acceptance.md) | The PR does what the step asked, all of it and nothing more. | `review-acceptance` |
+
+### Install agents
+
+The `skills` CLI installs skills only: `npx skills add` and `npx skills update` never touch
+`agents/`. Copy the agent files from a clone of this repo instead, and install the engineering
+bucket in the same scope: an agent preloads its skills by name, and a skill that isn't installed
+is skipped without an error.
+
+Clone this repo once:
+
+```bash
+git clone --depth 1 https://github.com/pvgloria/skills ~/.cache/pvgloria-skills
+```
+
+**Machine** — every project on this computer:
+
+```bash
+mkdir -p ~/.claude/agents && cp ~/.cache/pvgloria-skills/agents/*.md ~/.claude/agents/
+npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/engineering -g -s '*' --agent claude-code
+```
+
+**Project** — run from the project root, then commit `.claude/agents/` and `.claude/skills/`.
+Cloud sessions (Claude Code on the web) load both from the repository and do not load
+`~/.claude/agents/` or `~/.claude/skills/`, so this is the only install they see:
+
+```bash
+mkdir -p .claude/agents && cp ~/.cache/pvgloria-skills/agents/*.md .claude/agents/
+npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/engineering -s '*' --agent claude-code
+```
+
+To update the agents, run `git -C ~/.cache/pvgloria-skills pull` and copy them again.
 
 ## External skills (not mine)
 
