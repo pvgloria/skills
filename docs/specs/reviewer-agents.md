@@ -211,5 +211,4 @@ that is the job of `code-review`. Add the negative trigger.
   pieces. Fix them in the first step, on one reviewer, and verify the unconfirmed `skills`
   behaviour there.
 - **Language.** Skills, agents and docs are written in English.
-- **Commits and pushes.** `CLAUDE.md` allows committing and pushing the working branch. Nothing
-  is pushed directly to `main`.
+- **Commits and pushes.** `CLAUDE.md` allows committing and pushing, including to `main`.
