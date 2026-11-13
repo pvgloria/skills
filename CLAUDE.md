@@ -51,5 +51,5 @@ and duplicating the one-liner in both would just drift.
 
 ## Commits
 
-Claude runs commits in this repo — commit directly instead of proposing the message and
-waiting. Pushing is not covered: never push, force-push, or rewrite history.
+Claude runs commits and pushes in this repo — commit directly instead of proposing the message
+and waiting, and push. Pushing directly to `main` is allowed in this repo.
