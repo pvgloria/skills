@@ -30,17 +30,23 @@ Get the PR's description, changed files and diff with the first of these that wo
    `gh pr diff <link>`.
 2. The GitHub MCP tools: `pull_request_read` with the methods `get`, `get_files` and
    `get_diff`, taking the owner, repository and number from the link.
-3. `git diff` against the base branch: `git fetch origin pull/<number>/merge`, then
-   `git diff FETCH_HEAD^1...FETCH_HEAD^2`. GitHub's merge ref has the base branch as its first
-   parent and the PR head as its second. GitHub does not keep it while the PR has merge
-   conflicts.
+3. `git diff` against the base branch:
+   `git ls-remote origin refs/pull/<number>/head refs/pull/<number>/merge` prints the PR's head
+   commit, `<head>`, and its merge commit, `<merge>`. Run `git fetch origin <head> <merge>`, then
+   `git diff <merge>^1 <merge>`. GitHub's merge commit has the base branch as its first parent.
+   GitHub does not keep it while the PR has merge conflicts.
 
 If none of the three gives you the diff, send the `Cannot review:` reply described under Reply.
 
+`<head>` is the PR's head commit: `headRefOid` from `gh pr view`, `head.sha` from
+`pull_request_read` `get`, or the commit `git ls-remote origin refs/pull/<number>/head` prints.
+Name commits by their hash in every git command. Never use `FETCH_HEAD`: other processes may
+fetch in the same clone while you work, and each `git fetch` there rewrites it.
+
 The local working tree may be on a different branch from the PR. To read a whole file as it is
-on the PR head, run `git show FETCH_HEAD:<path>` right after `git fetch origin pull/<number>/head`,
-or use the GitHub MCP tool `get_file_contents` with the ref `refs/pull/<number>/head`. Read it
-from disk only when `git rev-parse HEAD` is the PR's head commit.
+on the PR head, run `git show <head>:<path>` after `git fetch origin <head>`, or use the GitHub
+MCP tool `get_file_contents` with the ref `refs/pull/<number>/head`. Read it from disk only when
+`git rev-parse HEAD` is `<head>`.
 
 ## Stay read-only
 
