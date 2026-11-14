@@ -80,6 +80,7 @@ npx skills list
 | [`refactor`](skills/engineering/refactor/SKILL.md) | Change unfamiliar code safely — map it first, characterize with tests, refactor in behaviour-preserving steps. |
 | [`review-acceptance`](skills/engineering/review-acceptance/SKILL.md) | Review a PR against its step — every acceptance criterion met, the goal delivered, nothing outside the scope. Loaded by the `reviewer-acceptance` agent. |
 | [`review-architecture`](skills/engineering/review-architecture/SKILL.md) | Review a PR's architecture — layer boundaries, dependency direction, where logic and state live, justified abstractions. Loaded by the `reviewer-architecture` agent. |
+| [`review-edge-cases`](skills/engineering/review-edge-cases/SKILL.md) | Review a PR's edge cases — empty, null, boundary and large inputs, failures, cancellation, concurrency, and whether their tests assert the behaviour. Loaded by the `reviewer-edge-cases` agent. |
 | [`ui-components`](skills/engineering/ui-components/SKILL.md) | Build UI reuse-first — discover the design system, reuse or compose it, author new only when nothing fits. |
 
 ## Productivity skills
@@ -109,6 +110,7 @@ convention.
 |-------|------|--------|
 | [`reviewer-acceptance`](agents/reviewer-acceptance.md) | The PR does what the step asked, all of it and nothing more. | `read-only-pr-review`, `review-acceptance` |
 | [`reviewer-architecture`](agents/reviewer-architecture.md) | Architecture and the good practices of the project's stack. | `read-only-pr-review`, `review-architecture`, `architecture`, `data-layer` |
+| [`reviewer-edge-cases`](agents/reviewer-edge-cases.md) | Edge cases: covered and not breaking. | `read-only-pr-review`, `review-edge-cases` |
 
 ### Install agents
 
