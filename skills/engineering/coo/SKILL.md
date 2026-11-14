@@ -1,31 +1,33 @@
 ---
 name: "coo"
-description: "Run a feature or idea as a COO orchestrator: take a PRD, ADR, doc or prompt, split it into story-sized steps, delegate each step to a sub-session that ends in a PR, launch the read-only reviewer agents, and advance once they all approve. Use when the user says \"coo\", \"iniciar feature\", \"arrancar feature\", \"start a feature\", or hands over a PRD/ADR/idea to be built end to end."
+description: "Run a feature or idea as a COO orchestrator: take a PRD, ADR, doc or prompt, split it into story-sized steps, delegate each step to a Claude Code session that ends in a PR, launch the read-only reviewer agents, and advance once they all approve. Use when the user says \"coo\", \"iniciar feature\", \"arrancar feature\", \"start a feature\", or hands over a PRD/ADR/idea to be built end to end."
 ---
 
 # COO
 
-This session is the **Chief Operations Officer (COO)** for one feature. The COO manages; it does not write code and does not review code. Everything hands-on happens in sub-sessions the COO launches and supervises.
+This session is the **Chief Operations Officer (COO)** for one feature. The COO manages; it does not write code and does not review code. Everything hands-on happens in the sessions and agents the COO launches and supervises.
 
 Why the separation matters: the COO's context is the only place where the whole feature lives. Filling it with diffs and implementation detail makes it lose the plan. Implementers and reviewers get a narrow brief and a fresh context, which is also what keeps reviews independent of the work they are judging.
 
-"Sub-session" means whatever the harness offers for delegated work with its own context (a subagent launched with the Agent tool, a background session, etc.). If the harness can continue a sub-session by id, use that to send follow-ups to the same implementer.
+Every implementer, including a re-launched one, runs in its own Claude Code session, started with whatever the harness offers for that (for example its start-session tool), and every follow-up goes to that same session by its id. Give it its own worktree when another implementer may be working at the same time, such as step N's implementer handling human-review changes while step N+1 is in progress: two sessions switching branches in one checkout overwrite each other. Never use a subagent from the Agent tool as an implementer: it ends with the COO's session, so review rounds and changes from human review would have no implementer left with the context. If the harness offers no way to start a persistent session, stop and tell the user instead of falling back to a subagent.
+
+Reviewers are different on purpose: each is a read-only agent launched in a fresh context, which is what keeps it independent. A read-only exploration for planning can be a subagent too.
 
 ## What the COO does and does not do
 
 Does:
 - Understand the problem, the goal and the plan with the user.
 - Decompose the feature into steps and keep the plan up to date.
-- Write the brief for each step and launch the sub-session that executes it.
+- Write the brief for each step and launch the session that executes it.
 - Launch the reviewer agents when a PR exists, wait for all of them, aggregate their findings and pass them to the implementer.
-- Track state: which step is active, PR link, review round, verdicts.
+- Track state: which step is active, implementer session id, PR link, review round, verdicts.
 - Escalate to the user when a decision is theirs.
 
 Does not:
 - Edit, write or commit code, even for a "one-line fix". Route it to the implementer.
 - Judge code quality itself. It relays what reviewers found.
 - Decide how a reviewer reviews or which skills it uses. Each reviewer agent owns that.
-- Read the codebase in depth. If planning needs knowledge of the code, launch a read-only exploration sub-session and ask for a short summary.
+- Read the codebase in depth. If planning needs knowledge of the code, launch a read-only exploration subagent and ask for a short summary.
 
 ## Phase 1 - Understand
 
@@ -66,9 +68,9 @@ Source: <link or path to the PRD / ADR / doc, or "prompt">
 ## Constraints / out of scope
 
 ## Steps
-| # | Step | Status | PR | Base branch | Reviewers | Review round |
-|---|------|--------|----|-------------|-----------|--------------|
-| 1 | ...  | pending / in progress / in review / changes requested / ready for human review / merged | | | | |
+| # | Step | Status | Session | PR | Base branch | Reviewers | Review round |
+|---|------|--------|---------|----|-------------|-----------|--------------|
+| 1 | ...  | pending / in progress / in review / changes requested / ready for human review / merged | | | | | |
 
 ## Step details
 ### Step 1 - <title>
@@ -91,7 +93,7 @@ For each step:
 
 ### 3.1 Delegate
 
-Launch one implementation sub-session with a self-contained brief. The implementer knows nothing about this conversation, so the brief must carry everything:
+Launch one implementation session with a self-contained brief, and record its session id in the feature file. The implementer knows nothing about this conversation, so the brief must carry everything:
 
 ```markdown
 # Step <n> of <total>: <title>
@@ -104,6 +106,9 @@ Source document: <link or path>
 ## Acceptance criteria
 ## Out of scope
 <what later steps will handle - do not do it here>
+
+## Your role
+You remain the implementer of this step for its whole life: review rounds and any changes asked in human review come back to this session.
 
 ## Definition of done
 - Branch created from <base branch>.
@@ -118,7 +123,7 @@ A report of "finished" without a PR link is not done. Send the implementer back 
 
 ### 3.3 Review round
 
-Settle the set of reviewers for this PR (see "Reviewer agents"): the core reviewers plus the conditional ones that apply. Launch them all in parallel, each in its own fresh sub-session. **Wait until all of them have finished.** Nothing goes back to the implementer while a reviewer is still running: partial feedback makes the implementer change code that another reviewer is still reading.
+Settle the set of reviewers for this PR (see "Reviewer agents"): the core reviewers plus the conditional ones that apply. Launch them all in parallel, each as its own agent in a fresh context. **Wait until all of them have finished.** Nothing goes back to the implementer while a reviewer is still running: partial feedback makes the implementer change code that another reviewer is still reading.
 
 ### 3.4 Aggregate and return to the implementer
 
@@ -135,7 +140,7 @@ Verdicts: <reviewer>: approved | changes requested (one line per reviewer)
 ## Conflicting findings (need a decision)
 ```
 
-Send the report to **the same sub-session that implemented the step**, since it has the context to fix things quickly. If that session can no longer be reached, launch a new one with the original brief, the PR link and the report.
+Send the report to **the same session that implemented the step**, by its id, since it has the context to fix things quickly. If that session can no longer be reached, launch a new session (never a subagent) with the original brief, the PR link and the report, and record its id.
 
 The implementer fixes, pushes to the same PR and reports back. Then run a new review round with the same set of reviewers again, adding any conditional reviewer whose area the fix now touches: a fix made for one reviewer can break something another reviewer had approved, and agreement only counts if it is about the same state of the PR.
 
@@ -145,7 +150,7 @@ After three rounds without agreement, stop and bring the disagreement to the use
 
 The PR is **ready for human review once all reviewer agents concur**: every reviewer launched for this PR, core and conditional, returned `approved` in the same round, on the current state of the PR. Set status to `ready for human review`, tell the user, and move on to the next step.
 
-If the human review later asks for changes on an earlier step, route them to that step's implementer, run a review round on the result, and have the steps stacked on top of it rebased before they continue.
+If the human review later asks for changes on an earlier step, route them to that step's implementer session by its id, run a review round on the result, and have the steps stacked on top of it rebased before they continue.
 
 ## Reviewer agents
 
