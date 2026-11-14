@@ -35,10 +35,8 @@ data, and what you judge it against.
   handles, find what bounds it: a fixed set, a limit the code enforces such as a page size, or
   nothing, as with messages, history and anything else that grows with use. Test fixtures do not
   show real sizes.
-- **Defaults and targets.** You judge against the stack's performance defaults and measurement
-  method, and against any target the project sets, such as a startup time in its docs or a
-  performance check in CI. Find the default a check relies on before you rely on it, and name it
-  in the finding in a few words.
+- **Targets.** Besides the checks below, you judge against any target the project sets, such as
+  a startup time in its docs or a performance check in CI.
 - **Claims.** Note each claim about speed or memory, in the PR description, its commits and code
   comments, or the step goal and acceptance criteria, and each measurement the PR shows. Section 7
   checks them.
@@ -195,7 +193,7 @@ A cost that reading settles needs no measurement: a network call on the main thr
 item, quadratic work over a collection that grows with use. Report it as it is.
 
 The measurement comes from the PR: numbers in its description, a linked report or trace, or the
-output of a benchmark it adds. It counts when it follows the stack's measurement method and:
+output of a benchmark it adds. It counts when it:
 
 - measures the path the claim is about, with data of the size the claim is about;
 - shows the code with and without the change, under the same conditions;

@@ -14,13 +14,37 @@ This review answers five questions about the PR, and only these:
 4. Does every new abstraction earn its place?
 5. Does the code the diff touches follow the rest of the architecture defaults?
 
-You judge against the project's and the stack's architecture defaults. This skill holds how to
-check them, not the defaults themselves: find the default a check relies on before you rely on
-it, and name it in the finding in a few words.
+You judge against the project's architecture decisions and the defaults below. Name the default
+or decision a finding relies on in a few words.
 
 The defaults are principles, not rigid rules. A departure from one is a finding only when you can
 name what it costs: a later change it makes harder, a type or rule that leaks into a layer that
 should not see it, a bug it lets in. If you cannot name a cost, leave it out.
+
+## Defaults
+
+The defaults for layered Android and Kotlin app code:
+
+- **Layers.** UI → presentation (state holders such as ViewModels) → domain → data, with
+  dependencies pointing that way only. A lower layer never imports an upper one, and the domain
+  knows nothing about the UI or the framework.
+- **The path from the UI.** The UI never reaches a data source: it goes through its state holder,
+  which calls a use case or a repository.
+- **Holders depend on abstractions,** never on concrete classes of the data layer.
+- **Business logic lives in the domain:** use cases and domain models. A use case earns its place
+  with validation, orchestration or transformation of its own; a pass-through does not.
+- **One repository per domain concept,** organized by what it returns, not by where the data is
+  stored.
+- **One home per piece of knowledge.** A business rule, formula or domain constant has exactly one
+  home. Code that only looks like other code, with no shared reason to change, is not a copy.
+- **Wire types stay at the edge.** `@Serializable` wire types (DTOs) live in the data layer and are
+  mapped to domain models there. Upper layers see domain types only.
+- **Transport errors stay at the edge.** No HTTP code, Retrofit exception or `IOException` leaves
+  the data layer: transport and protocol failures become a domain result the upper layers branch
+  on.
+- **`@SerialName` on every field** of every `@Serializable` response class, also where the Kotlin
+  name matches the JSON key. Without it, R8 renames the property in release builds and parsing
+  breaks at runtime.
 
 ## 1. Set the baseline
 
@@ -126,8 +150,7 @@ depends on a concrete class.
 
 ## 6. Check the other defaults
 
-The architecture defaults hold rules beyond the four checks above, such as how wire types are
-declared. Check the code the diff touches against each one that applies.
+The defaults hold rules beyond the four checks above, such as `@SerialName` on wire types. Check the code the diff touches against each one that applies.
 
 ## 7. Grade each finding
 
