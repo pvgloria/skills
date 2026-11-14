@@ -49,6 +49,45 @@ and duplicating the one-liner in both would just drift.
    `skills/personal/README.md` instead.
 3. Moving a skill across buckets means re-checking step 2 for both the old and new bucket.
 
+## Agents
+
+Claude Code subagent definitions live in `agents/` at the repo root, one Markdown file per agent.
+The repo is not a plugin, and the `skills` CLI does not install agents: they are copied into
+`~/.claude/agents/` or a project's `.claude/agents/`, with the commands in `README.md`.
+
+- **Naming.** Reviewer agents are `agents/reviewer-<area>.md`, with `name: reviewer-<area>` in
+  the frontmatter. Claude Code takes an agent's identity from `name`, not from the filename, so
+  keep the two equal. `coo` launches reviewers by these exact names.
+- **Agent body.** A reviewer agent's body holds only its role, its area, and the skills it
+  loads with what each one is for. Nothing else goes in the agent file.
+- **`skills` list.** `read-only-pr-review` first, then the agent's own `review-<area>` skill,
+  then any existing skill it reuses for its area.
+- **Shared skill.** `skills/engineering/read-only-pr-review/SKILL.md` holds what every reviewer
+  shares: the review request, how to get the PR and read files at its head, the read-only limits,
+  and the reply format with the verdict rules. Change it there; never copy it into an agent.
+- **Review skills.** How to review one area lives in `skills/engineering/review-<area>/SKILL.md`.
+  Both kinds of skill are placed and indexed like any other engineering skill.
+- **Black boxes.** Reviewer agents and review skills, the shared one included, do not mention
+  `coo`, an orchestrator, other agents or other skills. The only reference allowed is an agent
+  naming the skills it loads.
+- **Read-only.** Every reviewer agent sets `disallowedTools: Edit, Write, NotebookEdit, Agent`
+  and keeps Bash and the GitHub tools, which it needs to read the PR.
+
+### Where agents are listed
+
+Every agent is listed **exactly once**, in the agents table of the top-level `README.md`, with its
+name linked to its file and the skills it preloads. Only agents that exist in `agents/` are
+listed.
+
+### When adding or removing an agent
+
+1. Add or delete `agents/<name>.md`.
+2. Add or remove its row in the agents table of `README.md`.
+3. For a reviewer agent, add or remove its `review-<area>` skill and that skill's row in the
+   engineering table, following the skill steps above.
+4. If `coo` launches it, check that the name in `skills/engineering/coo/SKILL.md` matches the
+   agent's `name` character for character.
+
 ## Commits
 
 Claude runs commits and pushes in this repo — commit directly instead of proposing the message
