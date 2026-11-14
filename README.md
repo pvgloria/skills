@@ -140,8 +140,9 @@ mkdir -p ~/.claude/agents && cp ~/.cache/pvgloria-skills/agents/*.md ~/.claude/a
 npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/engineering -g -s '*' --agent claude-code
 ```
 
-**Project** — run from the project root, then commit `.claude/agents/` and `.claude/skills/`.
-Cloud sessions (Claude Code on the web) load both from the repository and do not load
+**Project** — run from the project root, then commit `.claude/agents/`, `.claude/skills/` and the
+`skills-lock.json` the CLI writes in the project root.
+Cloud sessions (Claude Code on the web) load both folders from the repository and do not load
 `~/.claude/agents/` or `~/.claude/skills/`, so this is the only install they see:
 
 ```bash
