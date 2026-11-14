@@ -25,9 +25,9 @@ match.
 - **COO bucket.** `coo`, `read-only-pr-review`, the `review-*` skills and the agents moved from
   `skills/engineering/` and `agents/` into the `skills/coo/` bucket, so the pack installs on its
   own.
-- **Self-contained pack.** `architecture`, `data-layer` and `performance` are not part of the
-  pack, and no agent preloads them. The defaults the architecture and performance reviewers
-  relied on from them are written into `review-architecture` and `review-performance`.
+- **Self-contained pack.** Agents preload only skills from the `skills/coo/` bucket. The
+  defaults the architecture and performance reviewers judge against are written into
+  `review-architecture` and `review-performance`.
 - **`Cannot review:` reply.** A reviewer that cannot read the PR, or lacks a skill it needs,
   replies `Cannot review: <reason>.` with no verdict. `coo` never counts it as approval and tells
   the user what is missing.
@@ -100,7 +100,7 @@ Treat these as constraints. Do not reopen them.
    and the reply format. The review skill holds how to review that area.
 4. **No skills from outside the pack.** Each agent loads `read-only-pr-review` and its own
    review skill only:
-   - `review-architecture` holds the layering and data-layer defaults it judges against.
+   - `review-architecture` holds the layering and data layer defaults it judges against.
    - `review-performance` holds the measurement rules it judges claims against.
    - `reviewer-project-practices` loads no fixed stack skill; its skill tells it to read the
      reviewed project's `CLAUDE.md` and documented conventions.
@@ -189,7 +189,7 @@ Area notes:
 
 | Skill | Must cover |
 |-------|-----------|
-| `review-architecture` | Layer boundaries, dependency direction, placement of logic and state, justified abstractions. Holds the layering and data-layer defaults it judges against. |
+| `review-architecture` | Layer boundaries, dependency direction, placement of logic and state, justified abstractions. Holds the layering and data layer defaults it judges against. |
 | `review-edge-cases` | Empty, null, boundary and large inputs; error and cancellation paths; concurrency; whether each case has a test and the test asserts behaviour. |
 | `review-project-practices` | Discovering the reviewed project's own rules (`CLAUDE.md`, contributing docs and other written conventions, neighbouring code) and checking the diff against them. No stack rules of its own, and no tools run. |
 | `review-acceptance` | Each acceptance criterion mapped to the code and test that satisfies it; criteria not met; changes outside the step's scope. |

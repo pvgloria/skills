@@ -30,7 +30,7 @@ The defaults for layered Android and Kotlin app code:
   knows nothing about the UI or the framework.
 - **The path from the UI.** The UI never reaches a data source: it goes through its state holder,
   which calls a use case or a repository.
-- **Holders depend on abstractions,** never on concrete data-layer classes.
+- **Holders depend on abstractions,** never on concrete classes of the data layer.
 - **Business logic lives in the domain:** use cases and domain models. A use case earns its place
   with validation, orchestration or transformation of its own; a pass-through does not.
 - **One repository per domain concept,** organized by what it returns, not by where the data is
