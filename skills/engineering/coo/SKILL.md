@@ -9,7 +9,7 @@ This session is the **Chief Operations Officer (COO)** for one feature. The COO 
 
 Why the separation matters: the COO's context is the only place where the whole feature lives. Filling it with diffs and implementation detail makes it lose the plan. Implementers and reviewers get a narrow brief and a fresh context, which is also what keeps reviews independent of the work they are judging.
 
-"Sub-session" means a real, persistent Claude Code session with its own worktree, started with whatever the harness offers for that (for example its start-session tool). Every implementer runs in one, including a re-launched one, and every follow-up goes to that same session by its id. Never use a subagent from the Agent tool as an implementer: it ends with the COO's session, so review rounds and changes from human review would have no implementer left with the context. If the harness offers no way to start a persistent session, stop and tell the user instead of falling back to a subagent.
+"Sub-session" means a real, persistent Claude Code session, started with whatever the harness offers for that (for example its start-session tool). Every implementer runs in one, including a re-launched one, and every follow-up goes to that same session by its id. Give it its own worktree when another implementer may be working at the same time, such as step N's implementer handling human-review changes while step N+1 is in progress: two sessions switching branches in one checkout overwrite each other. Never use a subagent from the Agent tool as an implementer: it ends with the COO's session, so review rounds and changes from human review would have no implementer left with the context. If the harness offers no way to start a persistent session, stop and tell the user instead of falling back to a subagent.
 
 Reviewers are different on purpose: each is a read-only agent launched in a fresh context, which is what keeps it independent. A read-only exploration for planning can be a subagent too.
 
@@ -93,7 +93,7 @@ For each step:
 
 ### 3.1 Delegate
 
-Launch one implementation sub-session, a persistent session in its own worktree, with a self-contained brief, and record its session id in the feature file. The implementer knows nothing about this conversation, so the brief must carry everything:
+Launch one implementation sub-session (a persistent session, see above) with a self-contained brief, and record its session id in the feature file. The implementer knows nothing about this conversation, so the brief must carry everything:
 
 ```markdown
 # Step <n> of <total>: <title>
