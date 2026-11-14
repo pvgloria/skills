@@ -12,8 +12,8 @@ A bucket is the unit you install — point the CLI at one and you get its skills
 npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/engineering -g
 ```
 
-**COO** — the `coo` orchestrator, its reviewer skills and agents. It needs more than this
-bucket; see [Install the COO pack](#install-the-coo-pack) for the full commands.
+**COO** — the `coo` orchestrator and its reviewer skills. The reviewer agents are copied
+separately; see [Install the COO pack](#install-the-coo-pack).
 
 ```bash
 npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/coo -g
@@ -101,8 +101,8 @@ npx skills list
 ## COO pack
 
 [`coo`](skills/coo/coo/SKILL.md) runs a feature as story-sized steps, one PR each, and launches
-reviewer agents by name on each step's PR. The skills, the agents and the review skills they
-preload live together in the [`skills/coo/`](skills/coo/) bucket.
+reviewer agents by name on each step's PR. `coo`, the agents and every skill they preload live
+together in the [`skills/coo/`](skills/coo/) bucket, which needs no other bucket.
 
 ### COO skills
 
@@ -124,29 +124,24 @@ Claude Code subagent definitions live in [`skills/coo/agents/`](skills/coo/agent
 agent. A reviewer agent's file holds only its role, its area and the skills it preloads:
 `read-only-pr-review`, shared by every reviewer, for getting the PR, staying read-only and the
 format of the verdict and findings; then its own `review-<area>` skill for how to review its
-area; then any existing skill it reuses for that area. See [CLAUDE.md](CLAUDE.md) for the
+area. See [CLAUDE.md](CLAUDE.md) for the
 convention.
 
 | Agent | Area | Skills |
 |-------|------|--------|
 | [`reviewer-acceptance`](skills/coo/agents/reviewer-acceptance.md) | The PR does what the step asked, all of it and nothing more. | `read-only-pr-review`, `review-acceptance` |
-| [`reviewer-architecture`](skills/coo/agents/reviewer-architecture.md) | Architecture and the good practices of the project's stack. | `read-only-pr-review`, `review-architecture`, `architecture`, `data-layer` |
+| [`reviewer-architecture`](skills/coo/agents/reviewer-architecture.md) | Architecture and the good practices of the project's stack. | `read-only-pr-review`, `review-architecture` |
 | [`reviewer-data-migrations`](skills/coo/agents/reviewer-data-migrations.md) | Data migrations: schema and persisted-format changes, upgrade from every shipped version, compatibility in both directions, rollback. | `read-only-pr-review`, `review-data-migrations` |
 | [`reviewer-edge-cases`](skills/coo/agents/reviewer-edge-cases.md) | Edge cases: covered and not breaking. | `read-only-pr-review`, `review-edge-cases` |
-| [`reviewer-performance`](skills/coo/agents/reviewer-performance.md) | Performance: hot paths, queries, large collections, rendering, startup. | `read-only-pr-review`, `review-performance`, `performance` |
+| [`reviewer-performance`](skills/coo/agents/reviewer-performance.md) | Performance: hot paths, queries, large collections, rendering, startup. | `read-only-pr-review`, `review-performance` |
 | [`reviewer-project-practices`](skills/coo/agents/reviewer-project-practices.md) | Practices defined in the project. | `read-only-pr-review`, `review-project-practices` |
 | [`reviewer-security`](skills/coo/agents/reviewer-security.md) | Security: auth, secrets, untrusted input, network and TLS, sensitive data at rest, permissions. | `read-only-pr-review`, `review-security` |
 
 ### Install the COO pack
 
-The pack is three pieces, installed in the same scope:
-
-- the `coo` bucket: `coo`, `read-only-pr-review` and the `review-*` skills;
-- `architecture`, `data-layer` and `performance` from the engineering bucket, which the
-  architecture and performance reviewers preload. An agent preloads a skill by name, and a skill
-  that isn't installed is skipped without an error;
-- the agent files. The `skills` CLI installs skills only: `npx skills add` and
-  `npx skills update` never touch agents, so they are copied from a clone of this repo.
+The pack is the `coo` bucket (`coo`, `read-only-pr-review` and the `review-*` skills) and the
+agent files, installed in the same scope. The `skills` CLI installs skills only: `npx skills add`
+and `npx skills update` never touch agents, so they are copied from a clone of this repo.
 
 Clone this repo once:
 
@@ -159,7 +154,6 @@ git clone --depth 1 https://github.com/pvgloria/skills ~/.cache/pvgloria-skills
 ```bash
 mkdir -p ~/.claude/agents && cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md ~/.claude/agents/
 npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/coo -g -s '*' --agent claude-code
-npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/engineering -g -s architecture -s data-layer -s performance --agent claude-code
 ```
 
 **Project** — run from the project root, then commit `.claude/agents/`, `.claude/skills/` and the
@@ -170,7 +164,6 @@ Cloud sessions (Claude Code on the web) load both folders from the repository an
 ```bash
 mkdir -p .claude/agents && cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md .claude/agents/
 npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/coo -s '*' --agent claude-code
-npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/engineering -s architecture -s data-layer -s performance --agent claude-code
 ```
 
 `npx skills update` refreshes the skills. To update the agents, run

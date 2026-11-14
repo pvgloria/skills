@@ -63,14 +63,14 @@ The repo is not a plugin, and the `skills` CLI does not install agents: they are
 - **Agent body.** A reviewer agent's body holds only its role, its area, and the skills it
   loads with what each one is for. Nothing else goes in the agent file.
 - **`skills` list.** `read-only-pr-review` first, then the agent's own `review-<area>` skill,
-  then any existing skill it reuses for its area.
+  and nothing else.
 - **Shared skill.** `skills/coo/read-only-pr-review/SKILL.md` holds what every reviewer
   shares: the review request, how to get the PR and read files at its head, the read-only limits,
   and the reply format with the verdict rules. Change it there; never copy it into an agent.
 - **Review skills.** How to review one area lives in `skills/coo/review-<area>/SKILL.md`.
   Both kinds of skill are placed and indexed like any other skill of the `coo` bucket.
-- **Reused skills.** A skill an agent reuses from another bucket stays in that bucket, never
-  copied into `coo/`. The COO install commands in `README.md` name each one with `-s`.
+- **Self-contained pack.** An agent preloads only skills from the `coo` bucket. Knowledge a
+  reviewer needs from another skill is written into its `review-<area>` skill.
 - **Black boxes.** Reviewer agents and review skills, the shared one included, do not mention
   `coo`, an orchestrator, other agents or other skills. The only reference allowed is an agent
   naming the skills it loads.
@@ -88,8 +88,7 @@ listed.
 1. Add or delete `skills/coo/agents/<name>.md`.
 2. Add or remove its row in the agents table of `README.md`.
 3. For a reviewer agent, add or remove its `review-<area>` skill and that skill's row in the
-   COO skills table, following the skill steps above. If its `skills` list adds or drops a skill
-   from another bucket, update the `-s` list of the COO install commands in `README.md`.
+   COO skills table, following the skill steps above.
 4. If `coo` launches it, check that the name in `skills/coo/coo/SKILL.md` matches the
    agent's `name` character for character.
 

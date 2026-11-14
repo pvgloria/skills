@@ -24,7 +24,10 @@ match.
   neighbouring code only.
 - **COO bucket.** `coo`, `read-only-pr-review`, the `review-*` skills and the agents moved from
   `skills/engineering/` and `agents/` into the `skills/coo/` bucket, so the pack installs on its
-  own. `architecture`, `data-layer` and `performance` stay in `skills/engineering/`.
+  own.
+- **Self-contained pack.** `architecture`, `data-layer` and `performance` are not part of the
+  pack, and no agent preloads them. The defaults the architecture and performance reviewers
+  relied on from them are written into `review-architecture` and `review-performance`.
 - **`Cannot review:` reply.** A reviewer that cannot read the PR, or lacks a skill it needs,
   replies `Cannot review: <reason>.` with no verdict. `coo` never counts it as approval and tells
   the user what is missing.
@@ -95,9 +98,10 @@ Treat these as constraints. Do not reopen them.
 3. **Split of content.** The agent file holds the role, the area and the list of skills it loads.
    The shared skill `read-only-pr-review` holds the request, getting the PR, the read-only limits
    and the reply format. The review skill holds how to review that area.
-4. **Existing skills are reused, not copied:**
-   - `reviewer-architecture` also loads `architecture` and `data-layer`.
-   - `reviewer-performance` also loads `performance`.
+4. **No skills from outside the pack.** Each agent loads `read-only-pr-review` and its own
+   review skill only:
+   - `review-architecture` holds the layering and data-layer defaults it judges against.
+   - `review-performance` holds the measurement rules it judges claims against.
    - `reviewer-project-practices` loads no fixed stack skill; its skill tells it to read the
      reviewed project's `CLAUDE.md` and documented conventions.
 5. **Read-only is enforced by tool removal plus instruction, without a hook.** Each agent sets
@@ -185,12 +189,12 @@ Area notes:
 
 | Skill | Must cover |
 |-------|-----------|
-| `review-architecture` | Layer boundaries, dependency direction, placement of logic and state, justified abstractions. Judges against the defaults the agent also preloads (`architecture`, `data-layer`), without naming them. |
+| `review-architecture` | Layer boundaries, dependency direction, placement of logic and state, justified abstractions. Holds the layering and data-layer defaults it judges against. |
 | `review-edge-cases` | Empty, null, boundary and large inputs; error and cancellation paths; concurrency; whether each case has a test and the test asserts behaviour. |
 | `review-project-practices` | Discovering the reviewed project's own rules (`CLAUDE.md`, contributing docs and other written conventions, neighbouring code) and checking the diff against them. No stack rules of its own, and no tools run. |
 | `review-acceptance` | Each acceptance criterion mapped to the code and test that satisfies it; criteria not met; changes outside the step's scope. |
 | `review-security` | Auth and authorization, secrets in code or logs, input validation, network and TLS, storage of sensitive data, permissions. |
-| `review-performance` | Work on hot paths, query count and shape, large collections, rendering, startup. Asks for a measurement where the claim needs one. Relies on the method the agent also preloads (`performance`), without naming it. |
+| `review-performance` | Work on hot paths, query count and shape, large collections, rendering, startup. Asks for a measurement where the claim needs one. Holds the measurement rules it judges claims against. |
 | `review-data-migrations` | Schema and persisted-format changes, upgrade path from every shipped version, backwards compatibility, rollback, migration tests. |
 
 The skill descriptions must not make these skills trigger for a person asking for a code review.
