@@ -186,6 +186,8 @@ What the COO relies on from every reviewer:
 - It is **read-only**: it points out problems and never edits code, pushes, comments on the PR or approves it.
 - It returns a **verdict** (`approved` or `changes requested`) and its findings, each with a severity (blocker, should-fix, nit), a location and the problem.
 
+A reviewer that cannot do its review replies with a single line and no verdict: `Cannot review: <reason>.`, for example when a skill it needs is not installed or it cannot read the PR. That reply never counts as `approved`: the round has no agreement while any reviewer gave it, and it is not a finding to send to the implementer. Tell the user which reviewer could not review and what is missing, quoting its reason, and ask how to proceed. Once the setup is fixed, launch that reviewer again on the same state of the PR.
+
 If a reviewer agent that should run does not exist in the current environment, do not improvise a replacement with a generic agent: tell the user which one is missing and ask how to proceed. If the project defines further reviewer agents, the user adds them to the set for that feature and the COO launches them like the others.
 
 ## Phase 4 - Close out
