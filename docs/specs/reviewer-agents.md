@@ -1,7 +1,30 @@
 # Spec: reviewer agents and review skills for `coo`
 
-Status: agreed, not started.
+Status: delivered, in eight stacked PRs starting at
+[#1](https://github.com/pvgloria/skills/pull/1). Step 8 ran the reviewers end to end.
 Branch with the `coo` skill: `claude/lucid-cannon-rcedp3`.
+
+## Changes after review
+
+The human review of the steps changed the shape below. The sections that follow are amended to
+match.
+
+- **Shared skill.** What every reviewer shares lives once, in
+  `skills/engineering/read-only-pr-review/SKILL.md`: the review request, getting the PR and
+  reading files at its head, the read-only limits, and the reply format. Agents do not repeat it.
+- **Black boxes.** Agents and skills do not mention `coo`, an orchestrator, other agents or other
+  skills. The only reference allowed is an agent naming the skills it loads.
+- **No "does not cover" sections.** A review skill states its scope as the questions it answers.
+- **Missing tests.** A missing test is never more than a `nit`, and the reviewer first judges
+  whether a test makes sense for the change at all.
+- **No tools run.** The reviewers run no formatter, linter, static analysis tool, build, test
+  suite or install.
+- **Project practices from documents and code.** By the user's decision,
+  `review-project-practices` checks the diff against the project's documented rules and the
+  neighbouring code only.
+- **`Cannot review:` reply.** A reviewer that cannot read the PR, or lacks a skill it needs,
+  replies `Cannot review: <reason>.` with no verdict. `coo` never counts it as approval and tells
+  the user what is missing.
 
 ## Context
 
@@ -66,8 +89,9 @@ Treat these as constraints. Do not reopen them.
 2. **One skill per reviewer**, in the `engineering` bucket:
    `skills/engineering/review-<area>/SKILL.md`, where `<area>` is `architecture`, `edge-cases`,
    `project-practices`, `acceptance`, `security`, `performance`, `data-migrations`.
-3. **Split of content.** The agent file holds the role, the read-only limits, the output format
-   and the list of skills it loads. The skill holds how to review that area.
+3. **Split of content.** The agent file holds the role, the area and the list of skills it loads.
+   The shared skill `read-only-pr-review` holds the request, getting the PR, the read-only limits
+   and the reply format. The review skill holds how to review that area.
 4. **Existing skills are reused, not copied:**
    - `reviewer-architecture` also loads `architecture` and `data-layer`.
    - `reviewer-performance` also loads `performance`.
@@ -75,8 +99,8 @@ Treat these as constraints. Do not reopen them.
      reviewed project's `CLAUDE.md` and documented conventions.
 5. **Read-only is enforced by tool removal plus instruction, without a hook.** Each agent sets
    `disallowedTools: Edit, Write, NotebookEdit, Agent`. It keeps `Bash` and the GitHub tools,
-   which it needs to read the PR. The agent body states that it must not push, comment on the PR,
-   approve it or change files through the shell.
+   which it needs to read the PR. The shared skill states that it must not push, comment on the
+   PR, approve it or change files through the shell.
 6. **All seven agents are in scope.**
 
 ## Facts about the platform
@@ -108,10 +132,10 @@ The `skills` CLI:
 - Installs skills only. It has no install target for agents.
 - Finds skills up to three levels below `skills/`, so `skills/<bucket>/<skill>/SKILL.md` is found.
 
-Not confirmed in the docs: whether a name in the `skills` frontmatter field resolves a user-level
-skill (`~/.claude/skills/`) the same way as a project skill. Verify it with one agent before
-writing the other six. If it does not resolve, the agent body must tell the agent to invoke its
-skill through the Skill tool.
+Verified in step 1: a name in the `skills` frontmatter field preloads a user-level skill
+(`~/.claude/skills/`) the same way as a project skill. A name that matches no installed skill is
+skipped without an error, so each agent invokes a missing skill through the Skill tool and
+replies `Cannot review:` if that fails too.
 
 ## Deliverables
 
@@ -121,15 +145,12 @@ skill through the Skill tool.
 
 - Frontmatter: `name` (exact name from the table), `description` (area and when it is launched),
   `disallowedTools`, `skills`.
-- Body:
-  - The area it reviews and what is outside it (the other reviewers' areas).
-  - The input it receives (the three-line message above) and how it gets the diff: the PR link,
-    through `gh` when available, otherwise the GitHub MCP tools or `git diff` against the base
-    branch.
-  - The read-only limits from decision 5.
-  - The output format below.
+- Body: a one-sentence role, `## Area` and `## Skills`, nothing else. The input, getting the diff
+  (`gh`, otherwise the GitHub MCP tools, otherwise `git diff` against the base branch), the
+  read-only limits and the reply format live in `read-only-pr-review`, which every agent loads
+  first.
 
-Output format, identical across the seven agents:
+Reply format, defined once in `read-only-pr-review`:
 
 ```markdown
 Verdict: approved | changes requested
@@ -139,7 +160,9 @@ Verdict: approved | changes requested
 ```
 
 Rules for the verdict: `changes requested` when there is at least one `blocker` or `should-fix`;
-`approved` when there are none or only `nit`. An empty findings list is a valid result.
+`approved` when there are none or only `nit`. An empty findings list is a valid result. A
+missing test is never more than a `nit`. A reviewer that cannot review replies only
+`Cannot review: <reason>.`, with no verdict.
 
 ### 2. Seven review skills
 
@@ -148,24 +171,27 @@ Rules for the verdict: `changes requested` when there is at least one `blocker` 
 [`skills/engineering/documentation-writing/SKILL.md`](../../skills/engineering/documentation-writing/SKILL.md).
 Each holds, for its area:
 
+- The questions the review answers, and only these.
 - What to look for, as concrete checks.
 - How to tell a `blocker` from a `should-fix` from a `nit` in that area.
-- What the area does not cover, naming the neighbouring review skill.
+
+A review skill names no other skill, agent or orchestrator, and repeats nothing from
+`read-only-pr-review`.
 
 Area notes:
 
 | Skill | Must cover |
 |-------|-----------|
-| `review-architecture` | Layer boundaries, dependency direction, placement of logic and state, justified abstractions. Defers the defaults themselves to `architecture` and `data-layer`. |
+| `review-architecture` | Layer boundaries, dependency direction, placement of logic and state, justified abstractions. Judges against the defaults the agent also preloads (`architecture`, `data-layer`), without naming them. |
 | `review-edge-cases` | Empty, null, boundary and large inputs; error and cancellation paths; concurrency; whether each case has a test and the test asserts behaviour. |
-| `review-project-practices` | Discovering the reviewed project's own rules (`CLAUDE.md`, contributing docs, lint config, neighbouring code) and checking the diff against them. No stack rules of its own. |
+| `review-project-practices` | Discovering the reviewed project's own rules (`CLAUDE.md`, contributing docs and other written conventions, neighbouring code) and checking the diff against them. No stack rules of its own, and no tools run. |
 | `review-acceptance` | Each acceptance criterion mapped to the code and test that satisfies it; criteria not met; changes outside the step's scope. |
 | `review-security` | Auth and authorization, secrets in code or logs, input validation, network and TLS, storage of sensitive data, permissions. |
-| `review-performance` | Work on hot paths, query count and shape, large collections, rendering, startup. Asks for a measurement where the claim needs one. Defers method to `performance`. |
+| `review-performance` | Work on hot paths, query count and shape, large collections, rendering, startup. Asks for a measurement where the claim needs one. Relies on the method the agent also preloads (`performance`), without naming it. |
 | `review-data-migrations` | Schema and persisted-format changes, upgrade path from every shipped version, backwards compatibility, rollback, migration tests. |
 
-The skill descriptions must not make these skills trigger for a human asking for a code review:
-that is the job of `code-review`. Add the negative trigger.
+The skill descriptions must not make these skills trigger for a person asking for a code review.
+Add the negative trigger, without naming another skill.
 
 ### 3. Repo conventions and index
 
@@ -174,8 +200,8 @@ that is the job of `code-review`. Add the negative trigger.
   (`.claude/agents/`, required for cloud sessions).
 - `CLAUDE.md`: the convention for `agents/` (location, naming, where agents are listed, what to
   update when one is added or removed).
-- `skills/engineering/coo/SKILL.md`: change only if a name or the output contract ends up
-  different from what it states. The intent is that it needs no change.
+- `skills/engineering/coo/SKILL.md`: names and reply contract unchanged. It gains one rule: a
+  `Cannot review:` reply never counts as approval, and `coo` tells the user what is missing.
 
 ## Acceptance criteria
 
@@ -183,8 +209,8 @@ that is the job of `code-review`. Add the negative trigger.
   character.
 - Every agent has `disallowedTools: Edit, Write, NotebookEdit, Agent` and a `skills` list that
   matches decisions 2 and 4.
-- The output format section is the same text in the seven agents.
-- Seven `review-*` skills exist; each passes
+- The reply format is defined once, in `read-only-pr-review`, and no agent repeats it.
+- Seven `review-*` skills and `read-only-pr-review` exist; each passes
   [`references/checklist.md`](../../skills/personal/skill-authoring/references/checklist.md):
   folder equals `name`, description under 1024 characters, no angle brackets in frontmatter.
 - Every new skill is listed exactly once, in the top-level `README.md`, linked to its `SKILL.md`.
