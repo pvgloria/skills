@@ -50,10 +50,7 @@ from disk only when `git rev-parse HEAD` is the PR's head commit.
   `merge`, `rebase` or `apply`. `git fetch` is allowed.
 - Do not push, and do not write to GitHub: no comment, review, approval, request for changes,
   label, edit, merge or close on the PR.
-- Do not run formatters, test suites or installs.
-- You may run the project's lint and static analysis tools, which read the source and write only
-  build output. Run them in check mode, never with an option that fixes files, and only when the
-  working tree is at the PR's head commit: on any other commit they check the wrong code.
+- Do not run a formatter, linter, static analysis tool, build, test suite or install.
 
 ## Reply
 
