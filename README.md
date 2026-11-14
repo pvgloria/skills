@@ -80,6 +80,7 @@ npx skills list
 | [`refactor`](skills/engineering/refactor/SKILL.md) | Change unfamiliar code safely — map it first, characterize with tests, refactor in behaviour-preserving steps. |
 | [`review-acceptance`](skills/engineering/review-acceptance/SKILL.md) | Review a PR against its step — every acceptance criterion met, the goal delivered, nothing outside the scope. Loaded by the `reviewer-acceptance` agent. |
 | [`review-architecture`](skills/engineering/review-architecture/SKILL.md) | Review a PR's architecture — layer boundaries, dependency direction, where logic and state live, justified abstractions. Loaded by the `reviewer-architecture` agent. |
+| [`review-data-migrations`](skills/engineering/review-data-migrations/SKILL.md) | Review a PR's data migrations — schema and persisted-format changes, the upgrade path from every shipped version, compatibility in both directions, rollback, and migration tests. Loaded by the `reviewer-data-migrations` agent. |
 | [`review-edge-cases`](skills/engineering/review-edge-cases/SKILL.md) | Review a PR's edge cases — empty, null, boundary and large inputs, failures, cancellation, concurrency, and whether their tests assert the behaviour. Loaded by the `reviewer-edge-cases` agent. |
 | [`review-performance`](skills/engineering/review-performance/SKILL.md) | Review a PR's performance — work on hot paths, query count and shape, large collections, rendering and startup, and a measurement where a speed or memory claim needs one. Loaded by the `reviewer-performance` agent. |
 | [`review-project-practices`](skills/engineering/review-project-practices/SKILL.md) | Review a PR against its project's own rules — CLAUDE.md files, contributing docs and other written conventions, and the conventions of the neighbouring code. Loaded by the `reviewer-project-practices` agent. |
@@ -113,6 +114,7 @@ convention.
 |-------|------|--------|
 | [`reviewer-acceptance`](agents/reviewer-acceptance.md) | The PR does what the step asked, all of it and nothing more. | `read-only-pr-review`, `review-acceptance` |
 | [`reviewer-architecture`](agents/reviewer-architecture.md) | Architecture and the good practices of the project's stack. | `read-only-pr-review`, `review-architecture`, `architecture`, `data-layer` |
+| [`reviewer-data-migrations`](agents/reviewer-data-migrations.md) | Data migrations: schema and persisted-format changes, upgrade from every shipped version, compatibility in both directions, rollback. | `read-only-pr-review`, `review-data-migrations` |
 | [`reviewer-edge-cases`](agents/reviewer-edge-cases.md) | Edge cases: covered and not breaking. | `read-only-pr-review`, `review-edge-cases` |
 | [`reviewer-performance`](agents/reviewer-performance.md) | Performance: hot paths, queries, large collections, rendering, startup. | `read-only-pr-review`, `review-performance`, `performance` |
 | [`reviewer-project-practices`](agents/reviewer-project-practices.md) | Practices defined in the project. | `read-only-pr-review`, `review-project-practices` |
