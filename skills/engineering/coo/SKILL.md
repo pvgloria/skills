@@ -1,15 +1,15 @@
 ---
 name: "coo"
-description: "Run a feature or idea as a COO orchestrator: take a PRD, ADR, doc or prompt, split it into story-sized steps, delegate each step to a sub-session that ends in a PR, launch the read-only reviewer agents, and advance once they all approve. Use when the user says \"coo\", \"iniciar feature\", \"arrancar feature\", \"start a feature\", or hands over a PRD/ADR/idea to be built end to end."
+description: "Run a feature or idea as a COO orchestrator: take a PRD, ADR, doc or prompt, split it into story-sized steps, delegate each step to a Claude Code session that ends in a PR, launch the read-only reviewer agents, and advance once they all approve. Use when the user says \"coo\", \"iniciar feature\", \"arrancar feature\", \"start a feature\", or hands over a PRD/ADR/idea to be built end to end."
 ---
 
 # COO
 
-This session is the **Chief Operations Officer (COO)** for one feature. The COO manages; it does not write code and does not review code. Everything hands-on happens in sub-sessions the COO launches and supervises.
+This session is the **Chief Operations Officer (COO)** for one feature. The COO manages; it does not write code and does not review code. Everything hands-on happens in the sessions and agents the COO launches and supervises.
 
 Why the separation matters: the COO's context is the only place where the whole feature lives. Filling it with diffs and implementation detail makes it lose the plan. Implementers and reviewers get a narrow brief and a fresh context, which is also what keeps reviews independent of the work they are judging.
 
-"Sub-session" means a real, persistent Claude Code session, started with whatever the harness offers for that (for example its start-session tool). Every implementer runs in one, including a re-launched one, and every follow-up goes to that same session by its id. Give it its own worktree when another implementer may be working at the same time, such as step N's implementer handling human-review changes while step N+1 is in progress: two sessions switching branches in one checkout overwrite each other. Never use a subagent from the Agent tool as an implementer: it ends with the COO's session, so review rounds and changes from human review would have no implementer left with the context. If the harness offers no way to start a persistent session, stop and tell the user instead of falling back to a subagent.
+Every implementer, including a re-launched one, runs in its own Claude Code session, started with whatever the harness offers for that (for example its start-session tool), and every follow-up goes to that same session by its id. Give it its own worktree when another implementer may be working at the same time, such as step N's implementer handling human-review changes while step N+1 is in progress: two sessions switching branches in one checkout overwrite each other. Never use a subagent from the Agent tool as an implementer: it ends with the COO's session, so review rounds and changes from human review would have no implementer left with the context. If the harness offers no way to start a persistent session, stop and tell the user instead of falling back to a subagent.
 
 Reviewers are different on purpose: each is a read-only agent launched in a fresh context, which is what keeps it independent. A read-only exploration for planning can be a subagent too.
 
@@ -18,7 +18,7 @@ Reviewers are different on purpose: each is a read-only agent launched in a fres
 Does:
 - Understand the problem, the goal and the plan with the user.
 - Decompose the feature into steps and keep the plan up to date.
-- Write the brief for each step and launch the sub-session that executes it.
+- Write the brief for each step and launch the session that executes it.
 - Launch the reviewer agents when a PR exists, wait for all of them, aggregate their findings and pass them to the implementer.
 - Track state: which step is active, implementer session id, PR link, review round, verdicts.
 - Escalate to the user when a decision is theirs.
@@ -93,7 +93,7 @@ For each step:
 
 ### 3.1 Delegate
 
-Launch one implementation sub-session (a persistent session, see above) with a self-contained brief, and record its session id in the feature file. The implementer knows nothing about this conversation, so the brief must carry everything:
+Launch one implementation session with a self-contained brief, and record its session id in the feature file. The implementer knows nothing about this conversation, so the brief must carry everything:
 
 ```markdown
 # Step <n> of <total>: <title>
@@ -140,7 +140,7 @@ Verdicts: <reviewer>: approved | changes requested (one line per reviewer)
 ## Conflicting findings (need a decision)
 ```
 
-Send the report to **the same sub-session that implemented the step**, by its session id, since it has the context to fix things quickly. If that session can no longer be reached, launch a new sub-session (never a subagent) with the original brief, the PR link and the report, and record its id.
+Send the report to **the same session that implemented the step**, by its id, since it has the context to fix things quickly. If that session can no longer be reached, launch a new session (never a subagent) with the original brief, the PR link and the report, and record its id.
 
 The implementer fixes, pushes to the same PR and reports back. Then run a new review round with the same set of reviewers again, adding any conditional reviewer whose area the fix now touches: a fix made for one reviewer can break something another reviewer had approved, and agreement only counts if it is about the same state of the PR.
 
