@@ -58,14 +58,20 @@ The repo is not a plugin, and the `skills` CLI does not install agents: they are
 - **Naming.** Reviewer agents are `agents/reviewer-<area>.md`, with `name: reviewer-<area>` in
   the frontmatter. Claude Code takes an agent's identity from `name`, not from the filename, so
   keep the two equal. `coo` launches reviewers by these exact names.
-- **Agent and skill.** The agent file holds the role, its area and what is outside it, the
-  read-only limits, the output format, and the `skills` it preloads. How to review the area lives
-  in a skill of its own, `skills/engineering/review-<area>/SKILL.md`, which is placed and indexed
-  like any other engineering skill.
+- **Agent body.** A reviewer agent's body holds only its role, its area, and the skills it
+  loads with what each one is for. Nothing else goes in the agent file.
+- **`skills` list.** `read-only-pr-review` first, then the agent's own `review-<area>` skill,
+  then any existing skill it reuses for its area.
+- **Shared skill.** `skills/engineering/read-only-pr-review/SKILL.md` holds what every reviewer
+  shares: the review request, how to get the PR and read files at its head, the read-only limits,
+  and the reply format with the verdict rules. Change it there; never copy it into an agent.
+- **Review skills.** How to review one area lives in `skills/engineering/review-<area>/SKILL.md`.
+  Both kinds of skill are placed and indexed like any other engineering skill.
+- **Black boxes.** Reviewer agents and review skills, the shared one included, do not mention
+  `coo`, an orchestrator, other agents or other skills. The only reference allowed is an agent
+  naming the skills it loads.
 - **Read-only.** Every reviewer agent sets `disallowedTools: Edit, Write, NotebookEdit, Agent`
   and keeps Bash and the GitHub tools, which it needs to read the PR.
-- **Shared text.** Everything from `## Input` to the end of a reviewer agent is the same text in
-  every reviewer agent. A change to it goes into all of them in the same commit.
 
 ### Where agents are listed
 

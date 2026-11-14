@@ -76,8 +76,9 @@ npx skills list
 | [`implement`](skills/engineering/implement/SKILL.md) | Drive an agreed task to a production-grade bar — block by block, stop to validate, never auto-commit. |
 | [`performance`](skills/engineering/performance/SKILL.md) | Optimize speed/memory the disciplined way — measure first, fix the proven bottleneck, verify against a baseline. |
 | [`project-bootstrap`](skills/engineering/project-bootstrap/SKILL.md) | Stand up a brand-new project through an interview, one decision at a time. |
+| [`read-only-pr-review`](skills/engineering/read-only-pr-review/SKILL.md) | Review a PR without changing anything — get the diff, stay read-only, reply with a verdict and graded findings. Loaded by every reviewer agent. |
 | [`refactor`](skills/engineering/refactor/SKILL.md) | Change unfamiliar code safely — map it first, characterize with tests, refactor in behaviour-preserving steps. |
-| [`review-acceptance`](skills/engineering/review-acceptance/SKILL.md) | Review a PR against its step — every acceptance criterion met and tested, nothing outside the scope. Loaded by the `reviewer-acceptance` agent. |
+| [`review-acceptance`](skills/engineering/review-acceptance/SKILL.md) | Review a PR against its step — every acceptance criterion met, the goal delivered, nothing outside the scope. Loaded by the `reviewer-acceptance` agent. |
 | [`ui-components`](skills/engineering/ui-components/SKILL.md) | Build UI reuse-first — discover the design system, reuse or compose it, author new only when nothing fits. |
 
 ## Productivity skills
@@ -96,13 +97,15 @@ npx skills list
 ## Agents
 
 Claude Code subagent definitions live in [`agents/`](agents/), one file per agent. The reviewer
-agents are the ones [`coo`](skills/engineering/coo/SKILL.md) launches by name on each step's PR:
-each is read-only, preloads its own `review-<area>` skill, and replies with a verdict and
-findings. See [CLAUDE.md](CLAUDE.md) for the convention.
+agents are the ones [`coo`](skills/engineering/coo/SKILL.md) launches by name on each step's PR.
+A reviewer agent's file holds only its role, its area and the skills it preloads:
+`read-only-pr-review`, shared by every reviewer, for getting the PR, staying read-only and the
+format of the verdict and findings; then its own `review-<area>` skill for how to review its
+area. See [CLAUDE.md](CLAUDE.md) for the convention.
 
 | Agent | Area | Skills |
 |-------|------|--------|
-| [`reviewer-acceptance`](agents/reviewer-acceptance.md) | The PR does what the step asked, all of it and nothing more. | `review-acceptance` |
+| [`reviewer-acceptance`](agents/reviewer-acceptance.md) | The PR does what the step asked, all of it and nothing more. | `read-only-pr-review`, `review-acceptance` |
 
 ### Install agents
 
