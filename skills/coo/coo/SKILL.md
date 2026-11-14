@@ -46,6 +46,8 @@ Whatever the form, be able to state in a few lines before planning:
 
 Ask only the questions the input leaves open and whose answers change the plan. Record a link or path to the source document in the feature file so implementers can read the original.
 
+As soon as the feature has a name, rename this session to `COO: <Task>`, where `<Task>` is that short name, the same one the feature file uses, so it stands out from the implementer sessions it launches. Use whatever the harness offers for that (for example its set-session-title tool); if it offers nothing, carry on without it.
+
 ## Phase 2 - Decompose into steps
 
 A **step is not a commit**. It is a complete slice of the feature, the equivalent of a User Story inside an Epic: it delivers something coherent and can be reviewed on its own.
