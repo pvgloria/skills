@@ -10,7 +10,7 @@ The human review of the steps changed the shape below. The sections that follow 
 match.
 
 - **Shared skill.** What every reviewer shares lives once, in
-  `skills/engineering/read-only-pr-review/SKILL.md`: the review request, getting the PR and
+  `skills/coo/read-only-pr-review/SKILL.md`: the review request, getting the PR and
   reading files at its head, the read-only limits, and the reply format. Agents do not repeat it.
 - **Black boxes.** Agents and skills do not mention `coo`, an orchestrator, other agents or other
   skills. The only reference allowed is an agent naming the skills it loads.
@@ -22,6 +22,9 @@ match.
 - **Project practices from documents and code.** By the user's decision,
   `review-project-practices` checks the diff against the project's documented rules and the
   neighbouring code only.
+- **COO bucket.** `coo`, `read-only-pr-review`, the `review-*` skills and the agents moved from
+  `skills/engineering/` and `agents/` into the `skills/coo/` bucket, so the pack installs on its
+  own. `architecture`, `data-layer` and `performance` stay in `skills/engineering/`.
 - **`Cannot review:` reply.** A reviewer that cannot read the PR, or lacks a skill it needs,
   replies `Cannot review: <reason>.` with no verdict. `coo` never counts it as approval and tells
   the user what is missing.
@@ -31,7 +34,7 @@ match.
 This repo holds personal Claude Code skills, installed with the `skills` CLI
 (`vercel-labs/skills`). Layout and indexing rules are in [`CLAUDE.md`](../../CLAUDE.md).
 
-[`skills/engineering/coo/SKILL.md`](../../skills/engineering/coo/SKILL.md) defines a COO
+[`skills/coo/coo/SKILL.md`](../../skills/coo/coo/SKILL.md) defines a COO
 orchestrator. For each step of a feature it launches an implementer sub-session that ends in a
 PR, then launches reviewer agents **by name** and advances only when all of them return
 `approved`. It names seven agents:
@@ -84,10 +87,10 @@ After this work:
 
 Treat these as constraints. Do not reopen them.
 
-1. **Agents live in `agents/` at the repo root**, one file per agent: `agents/reviewer-<area>.md`.
+1. **Agents live in `skills/coo/agents/`**, one file per agent: `skills/coo/agents/reviewer-<area>.md`.
    The repo does not become a Claude Code plugin.
-2. **One skill per reviewer**, in the `engineering` bucket:
-   `skills/engineering/review-<area>/SKILL.md`, where `<area>` is `architecture`, `edge-cases`,
+2. **One skill per reviewer**, in the `coo` bucket:
+   `skills/coo/review-<area>/SKILL.md`, where `<area>` is `architecture`, `edge-cases`,
    `project-practices`, `acceptance`, `security`, `performance`, `data-migrations`.
 3. **Split of content.** The agent file holds the role, the area and the list of skills it loads.
    The shared skill `read-only-pr-review` holds the request, getting the PR, the read-only limits
@@ -141,7 +144,7 @@ replies `Cannot review:` if that fails too.
 
 ### 1. Seven agent definitions
 
-`agents/reviewer-<area>.md`, each with:
+`skills/coo/agents/reviewer-<area>.md`, each with:
 
 - Frontmatter: `name` (exact name from the table), `description` (area and when it is launched),
   `disallowedTools`, `skills`.
@@ -166,7 +169,7 @@ missing test is never more than a `nit`. A reviewer that cannot review replies o
 
 ### 2. Seven review skills
 
-`skills/engineering/review-<area>/SKILL.md`, written to
+`skills/coo/review-<area>/SKILL.md`, written to
 [`skills/personal/skill-authoring/SKILL.md`](../../skills/personal/skill-authoring/SKILL.md) and
 [`skills/engineering/documentation-writing/SKILL.md`](../../skills/engineering/documentation-writing/SKILL.md).
 Each holds, for its area:
@@ -195,17 +198,17 @@ Add the negative trigger, without naming another skill.
 
 ### 3. Repo conventions and index
 
-- `README.md`: seven new rows in the engineering table; a section on the agents with a table of
+- `README.md`: seven new rows in the COO skills table; a section on the agents with a table of
   the seven and the install commands for a machine (`~/.claude/agents/`) and for a project
   (`.claude/agents/`, required for cloud sessions).
-- `CLAUDE.md`: the convention for `agents/` (location, naming, where agents are listed, what to
+- `CLAUDE.md`: the convention for `skills/coo/agents/` (location, naming, where agents are listed, what to
   update when one is added or removed).
-- `skills/engineering/coo/SKILL.md`: names and reply contract unchanged. It gains one rule: a
+- `skills/coo/coo/SKILL.md`: names and reply contract unchanged. It gains one rule: a
   `Cannot review:` reply never counts as approval, and `coo` tells the user what is missing.
 
 ## Acceptance criteria
 
-- `agents/` holds exactly seven files; each `name` matches the `coo` tables character for
+- `skills/coo/agents/` holds exactly seven files; each `name` matches the `coo` tables character for
   character.
 - Every agent has `disallowedTools: Edit, Write, NotebookEdit, Agent` and a `skills` list that
   matches decisions 2 and 4.
@@ -214,7 +217,7 @@ Add the negative trigger, without naming another skill.
   [`references/checklist.md`](../../skills/personal/skill-authoring/references/checklist.md):
   folder equals `name`, description under 1024 characters, no angle brackets in frontmatter.
 - Every new skill is listed exactly once, in the top-level `README.md`, linked to its `SKILL.md`.
-- `README.md` documents both install paths for the agents; `CLAUDE.md` documents the `agents/`
+- `README.md` documents both install paths for the agents; `CLAUDE.md` documents the `skills/coo/agents/`
   convention.
 - With the agents copied into a project's `.claude/agents/` and the skills installed, launching
   one core and one conditional reviewer against a real PR returns a verdict and findings in the
