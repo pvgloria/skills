@@ -20,7 +20,7 @@ Does:
 - Decompose the feature into steps and keep the plan up to date.
 - Write the brief for each step and launch the session that executes it.
 - Launch the reviewer agents when a PR exists, wait for all of them, aggregate their findings and pass them to the implementer.
-- Track state: which step is active, implementer session id, PR link, review round, verdicts.
+- Track state: which step is active, implementer session id, PR link and head SHA, review round, verdicts.
 - Escalate to the user when a decision is theirs.
 
 Does not:
@@ -70,9 +70,9 @@ Source: <link or path to the PRD / ADR / doc, or "prompt">
 ## Constraints / out of scope
 
 ## Steps
-| # | Step | Status | Session | PR | Base branch | Reviewers | Review round |
-|---|------|--------|---------|----|-------------|-----------|--------------|
-| 1 | ...  | pending / in progress / in review / changes requested / ready for human review / merged | | | | | |
+| # | Step | Status | Session | PR | Head SHA | Base branch | Reviewers | Review round |
+|---|------|--------|---------|----|----------|-------------|-----------|--------------|
+| 1 | ...  | pending / in progress / in review / changes requested / ready for human review / merged | | | | | | |
 
 ## Step details
 ### Step 1 - <title>
@@ -112,16 +112,27 @@ Source document: <link or path>
 ## Your role
 You remain the implementer of this step for its whole life: review rounds and any changes asked in human review come back to this session.
 
+## Reporting to the COO
+COO session id: <this session's id>
+Every time you open the PR or push to it, including fixes during review rounds and changes from human review, send a message to that session id with SendMessage, or whatever tool the harness offers for messaging another session. Its first line is:
+`Step <n> PR <link> at <short SHA>: <opened | pushed fixes for round N>`
+Your end-of-turn reply still goes out, but it is not the signal the COO waits for.
+
 ## Definition of done
 - Branch created from <base branch>.
 - Implementation and tests complete, checks passing locally.
 - A pull request is open against <base branch>.
+- COO messaged directly with the PR link and SHA.
 - Reply with: PR link, summary of what was done, anything left open or decided along the way.
 ```
 
+Fill in this session's own id under "Reporting to the COO", from whatever the harness offers (for example its get-session tool).
+
+The implementer's direct message is what the COO waits for, every time the PR is opened or pushed. It arrives as its own message and starts a COO turn. The app's end-of-turn note does not count: it can go missing or arrive late, and a push the COO never hears about is a review round that never runs. If a note says the implementer finished but no direct message came, check the PR's head SHA with `gh pr view <n> --json headRefOid` before deciding whether a round is due. A SHA that differs from the one in the feature file means the PR changed since the COO last heard.
+
 ### 3.2 Step is done only when a PR exists
 
-A report of "finished" without a PR link is not done. Send the implementer back to open it. Record the PR in the feature file and set status to `in review`.
+The step moves to review when the implementer's direct message reports the PR as opened. A report of "finished" without a PR link is not done: send the implementer back to open it. Record the PR and its SHA in the feature file and set status to `in review`.
 
 ### 3.3 Review round
 
@@ -140,11 +151,15 @@ Verdicts: <reviewer>: approved | changes requested (one line per reviewer)
 ## Should-fix
 ## Nits
 ## Conflicting findings (need a decision)
+
+## After you push the fixes
+Send a message to COO session <this session's id> with SendMessage, as in your brief. Its first line is:
+`Step <step> PR <link> at <short SHA>: pushed fixes for round <n>`
 ```
 
 Send the report to **the same session that implemented the step**, by its id, since it has the context to fix things quickly. If that session can no longer be reached, launch a new session (never a subagent) with the original brief, the PR link and the report, and record its id.
 
-The implementer fixes, pushes to the same PR and reports back. Then run a new review round with the same set of reviewers again, adding any conditional reviewer whose area the fix now touches: a fix made for one reviewer can break something another reviewer had approved, and agreement only counts if it is about the same state of the PR.
+The implementer fixes, pushes to the same PR and messages the COO directly. When that message arrives, record the new SHA and run a new review round with the same set of reviewers again, adding any conditional reviewer whose area the fix now touches: a fix made for one reviewer can break something another reviewer had approved, and agreement only counts if it is about the same state of the PR.
 
 After three rounds without agreement, stop and bring the disagreement to the user instead of looping.
 
@@ -152,7 +167,7 @@ After three rounds without agreement, stop and bring the disagreement to the use
 
 The PR is **ready for human review once all reviewer agents concur**: every reviewer launched for this PR, core and conditional, returned `approved` in the same round, on the current state of the PR. Set status to `ready for human review`, tell the user, and move on to the next step.
 
-If the human review later asks for changes on an earlier step, route them to that step's implementer session by its id, run a review round on the result, and have the steps stacked on top of it rebased before they continue.
+If the human review later asks for changes on an earlier step, route them to that step's implementer session by its id. When its direct message reports the push, run a review round on the result, and have the steps stacked on top of it rebased before they continue.
 
 ## Reviewer agents
 
