@@ -162,7 +162,7 @@ Then replace that reviewer's entry under "Open findings" with what the next roun
 
 Aggregating is the COO's job. Merge the reviewers' output into one report without adding opinions of its own: group by severity, merge duplicates (keeping which reviewers raised them), and flag contradictions between reviewers rather than resolving them. A contradiction the implementer cannot settle goes to the user.
 
-The report carries what holds the PR back, plus the nits of first reviews. A previous finding marked `not resolved` goes under its original severity. New `should-fix` and `nit` findings from a follow-up review do not hold the PR back and do not go to the implementer: add them to "Follow-ups for human review" in the feature file instead. Sending them would start another change and another round over findings that were not part of the agreement.
+The report carries only what holds the PR back. A previous finding marked `not resolved` goes under its original severity. Nits, from any round, and new `should-fix` findings from a follow-up review do not hold the PR back and do not go to the implementer: add them to "Follow-ups for human review" in the feature file instead, where the user decides on them in human review. Do not ask the user each round whether to fix nits. Sending them would start another change and another round over findings that were not part of the agreement.
 
 ```markdown
 # Review of PR <link> - round <n>
@@ -171,7 +171,6 @@ Verdicts: <reviewer>: approved | changes requested (one line per reviewer)
 
 ## Blockers
 ## Should-fix
-## Nits
 ## Conflicting findings (need a decision)
 
 ## After you push the fixes
