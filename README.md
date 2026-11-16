@@ -100,9 +100,9 @@ writing or reviewing code itself:
 1. **Plan** — agrees the problem, goal and constraints with you, splits the feature into
    story-sized steps, and keeps the plan and its state in a feature file.
 2. **Delegate** — hands each step to its own Claude Code implementer session, which ends with
-   a PR. The plan gives each step its implementer's model and effort: Sonnet by default, Opus
-   only for steps that set a shape later steps build on or touch concurrency, stored data or
-   security.
+   a PR. The plan gives each step its implementer's model and effort: Opus / medium by default,
+   Opus / high for steps that set a shape later steps build on or touch concurrency, stored data
+   or security.
 3. **Review** — runs one review round per PR: launches the reviewer agents in parallel, waits
    silently for all of them, and sends their blockers and should-fix findings to the same
    implementer once. There is no second round.

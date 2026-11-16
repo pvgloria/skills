@@ -60,8 +60,8 @@ Good steps:
 
 Give each step the model and effort its implementer session runs with:
 
-- `sonnet` / `high` by default.
-- `opus` / `high` only for a step that sets a shape later steps build on, or that touches concurrency, stored data or security-sensitive code.
+- `opus` / `medium` by default.
+- `opus` / `high` for a step that sets a shape later steps build on, or that touches concurrency, stored data or security-sensitive code.
 
 The choice holds for the step's whole life, re-launched implementers included, unless the user changes it.
 
@@ -79,7 +79,7 @@ Source: <link or path to the PRD / ADR / doc, or "prompt">
 ## Steps
 | # | Step | Status | Implementer | Session | PR | Head SHA | Base branch | Reviewers |
 |---|------|--------|-------------|---------|----|----------|-------------|-----------|
-| 1 | ...  | pending / in progress / in review / changes requested / ready for human review / merged | sonnet / high | | | | | |
+| 1 | ...  | pending / in progress / in review / changes requested / ready for human review / merged | opus / medium | | | | | |
 
 ## Step details
 ### Step 1 - <title>
@@ -99,7 +99,7 @@ Source: <link or path to the PRD / ADR / doc, or "prompt">
 | Step | Session | Model / effort | Cost (USD) | Tokens in / cache read / cache write / out |
 |------|---------|----------------|------------|--------------------------------------------|
 | - | COO | opus / xhigh | 2.10 | 1k / 3.2M / 210k / 25k |
-| 1 | <implementer session id> | sonnet / high | 4.80 | 2k / 9.1M / 640k / 70k |
+| 1 | <implementer session id> | opus / medium | 4.80 | 2k / 9.1M / 640k / 70k |
 | 1 | COO | opus / xhigh | 6.30 | 1k / 16M / 410k / 46k |
 
 ## Follow-ups for human review
