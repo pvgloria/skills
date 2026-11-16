@@ -184,12 +184,12 @@ the second round on, `coo` runs its follow-up reviews on sonnet / medium.
 | Agent | Runs on | Area | Model / effort | Skills |
 |-------|---------|------|----------------|--------|
 | [`reviewer-acceptance`](skills/coo/agents/reviewer-acceptance.md) | Every PR | The PR does what the step asked, all of it and nothing more. | sonnet / medium | `read-only-pr-review`, `review-acceptance` |
-| [`reviewer-architecture`](skills/coo/agents/reviewer-architecture.md) | Every PR with code | Architecture and the good practices of the project's stack. | opus / high | `read-only-pr-review`, `review-architecture` |
-| [`reviewer-edge-cases`](skills/coo/agents/reviewer-edge-cases.md) | Every PR with code | Edge cases: covered and not breaking. | opus / high | `read-only-pr-review`, `review-edge-cases` |
+| [`reviewer-architecture`](skills/coo/agents/reviewer-architecture.md) | Every PR with code | Architecture and the good practices of the project's stack. | sonnet / medium | `read-only-pr-review`, `review-architecture` |
+| [`reviewer-edge-cases`](skills/coo/agents/reviewer-edge-cases.md) | Every PR with code | Edge cases: covered and not breaking. | sonnet / medium | `read-only-pr-review`, `review-edge-cases` |
 | [`reviewer-project-practices`](skills/coo/agents/reviewer-project-practices.md) | Every PR | Practices defined in the project. | sonnet / medium | `read-only-pr-review`, `review-project-practices` |
-| [`reviewer-security`](skills/coo/agents/reviewer-security.md) | When touched | Security: auth, secrets, untrusted input, network and TLS, sensitive data at rest, permissions. | opus / high | `read-only-pr-review`, `review-security` |
-| [`reviewer-performance`](skills/coo/agents/reviewer-performance.md) | When touched | Performance: hot paths, queries, large collections, rendering, startup. | opus / high | `read-only-pr-review`, `review-performance` |
-| [`reviewer-data-migrations`](skills/coo/agents/reviewer-data-migrations.md) | When touched | Data migrations: schema and persisted-format changes, upgrade from every shipped version, compatibility in both directions, rollback. | opus / high | `read-only-pr-review`, `review-data-migrations` |
+| [`reviewer-security`](skills/coo/agents/reviewer-security.md) | When touched | Security: auth, secrets, untrusted input, network and TLS, sensitive data at rest, permissions. | sonnet / high | `read-only-pr-review`, `review-security` |
+| [`reviewer-performance`](skills/coo/agents/reviewer-performance.md) | When touched | Performance: hot paths, queries, large collections, rendering, startup. | sonnet / medium | `read-only-pr-review`, `review-performance` |
+| [`reviewer-data-migrations`](skills/coo/agents/reviewer-data-migrations.md) | When touched | Data migrations: schema and persisted-format changes, upgrade from every shipped version, compatibility in both directions, rollback. | sonnet / high | `read-only-pr-review`, `review-data-migrations` |
 
 ### COO skills
 
