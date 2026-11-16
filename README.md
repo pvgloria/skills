@@ -104,7 +104,7 @@ writing or reviewing code itself:
    follow a shape the code already has, Opus for the rest.
 3. **Review** — launches the reviewer agents on the PR in parallel, waits for all of them, and
    sends their merged findings back to the same implementer. From the second round on, each
-   reviewer checks its own previous findings and reviews only what changed since, on Sonnet.
+   reviewer checks its own previous findings and reviews only what changed since, on Haiku.
 4. **Advance** — once every reviewer approves, marks the PR ready for human review and starts
    the next step, stacked on the previous one if it isn't merged yet.
 
@@ -179,7 +179,7 @@ project practices run. The rest run only when the PR touches their area.
 
 Every agent loads two skills: `read-only-pr-review`, which they all share, and its own
 `review-<area>`. Each agent's file sets the model and effort of its first review on a PR. From
-the second round on, `coo` runs its follow-up reviews on sonnet / medium.
+the second round on, `coo` runs its follow-up reviews on haiku / medium.
 
 | Agent | Runs on | Area | Model / effort | Skills |
 |-------|---------|------|----------------|--------|
