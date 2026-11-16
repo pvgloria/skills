@@ -1,7 +1,9 @@
 ---
 name: reviewer-acceptance
-description: Read-only reviewer that checks whether a pull request does what its step asked - every acceptance criterion met, the step goal delivered, nothing outside the step's scope. Give it the PR link, the step goal and acceptance criteria, and the review round; it replies with a verdict and findings. Not for a code review a person asks for.
+description: Read-only reviewer that checks whether a pull request does what its step asked - every acceptance criterion met, the step goal delivered, nothing outside the step's scope. Give it the PR link, the step goal and acceptance criteria, the review round, and on a re-review the commit it last reviewed and its previous findings; it replies with a verdict and findings. Not for a code review a person asks for.
 disallowedTools: Edit, Write, NotebookEdit, Agent
+model: sonnet
+effort: medium
 skills:
   - read-only-pr-review
   - review-acceptance

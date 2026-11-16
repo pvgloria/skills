@@ -88,7 +88,8 @@ writing or reviewing code itself:
 2. **Delegate** — hands each step to its own Claude Code implementer session, which ends with
    a PR.
 3. **Review** — launches the reviewer agents on the PR in parallel, waits for all of them, and
-   sends their merged findings back to the same implementer, round after round.
+   sends their merged findings back to the same implementer. From the second round on, each
+   reviewer checks its own previous findings and reviews only what changed since.
 4. **Advance** — once every reviewer approves, marks the PR ready for human review and starts
    the next step, stacked on the previous one if it isn't merged yet.
 
@@ -137,26 +138,27 @@ git -C ~/.cache/pvgloria-skills pull
 ### Reviewer agents
 
 Each reviewer is a read-only Claude Code subagent that covers one area. The core reviewers run
-on every PR; the conditional ones only when the PR touches their area. An agent's file holds
-only its role, its area and the two skills it preloads: `read-only-pr-review`, shared by all,
-and its own `review-<area>`.
+on every PR with code; a PR of only documentation or binary assets gets acceptance and project
+practices alone. The conditional ones run only when the PR touches their area. An agent's file
+holds only its role, its area and the two skills it preloads: `read-only-pr-review`, shared by
+all, and its own `review-<area>`. Its frontmatter sets the model and effort it runs at.
 
-| Agent | Runs on | Area | Skills |
-|-------|---------|------|--------|
-| [`reviewer-acceptance`](skills/coo/agents/reviewer-acceptance.md) | Every PR | The PR does what the step asked, all of it and nothing more. | `read-only-pr-review`, `review-acceptance` |
-| [`reviewer-architecture`](skills/coo/agents/reviewer-architecture.md) | Every PR | Architecture and the good practices of the project's stack. | `read-only-pr-review`, `review-architecture` |
-| [`reviewer-edge-cases`](skills/coo/agents/reviewer-edge-cases.md) | Every PR | Edge cases: covered and not breaking. | `read-only-pr-review`, `review-edge-cases` |
-| [`reviewer-project-practices`](skills/coo/agents/reviewer-project-practices.md) | Every PR | Practices defined in the project. | `read-only-pr-review`, `review-project-practices` |
-| [`reviewer-security`](skills/coo/agents/reviewer-security.md) | When touched | Security: auth, secrets, untrusted input, network and TLS, sensitive data at rest, permissions. | `read-only-pr-review`, `review-security` |
-| [`reviewer-performance`](skills/coo/agents/reviewer-performance.md) | When touched | Performance: hot paths, queries, large collections, rendering, startup. | `read-only-pr-review`, `review-performance` |
-| [`reviewer-data-migrations`](skills/coo/agents/reviewer-data-migrations.md) | When touched | Data migrations: schema and persisted-format changes, upgrade from every shipped version, compatibility in both directions, rollback. | `read-only-pr-review`, `review-data-migrations` |
+| Agent | Runs on | Area | Model / effort | Skills |
+|-------|---------|------|----------------|--------|
+| [`reviewer-acceptance`](skills/coo/agents/reviewer-acceptance.md) | Every PR | The PR does what the step asked, all of it and nothing more. | sonnet / medium | `read-only-pr-review`, `review-acceptance` |
+| [`reviewer-architecture`](skills/coo/agents/reviewer-architecture.md) | Every PR with code | Architecture and the good practices of the project's stack. | opus / high | `read-only-pr-review`, `review-architecture` |
+| [`reviewer-edge-cases`](skills/coo/agents/reviewer-edge-cases.md) | Every PR with code | Edge cases: covered and not breaking. | opus / high | `read-only-pr-review`, `review-edge-cases` |
+| [`reviewer-project-practices`](skills/coo/agents/reviewer-project-practices.md) | Every PR | Practices defined in the project. | sonnet / medium | `read-only-pr-review`, `review-project-practices` |
+| [`reviewer-security`](skills/coo/agents/reviewer-security.md) | When touched | Security: auth, secrets, untrusted input, network and TLS, sensitive data at rest, permissions. | opus / high | `read-only-pr-review`, `review-security` |
+| [`reviewer-performance`](skills/coo/agents/reviewer-performance.md) | When touched | Performance: hot paths, queries, large collections, rendering, startup. | opus / high | `read-only-pr-review`, `review-performance` |
+| [`reviewer-data-migrations`](skills/coo/agents/reviewer-data-migrations.md) | When touched | Data migrations: schema and persisted-format changes, upgrade from every shipped version, compatibility in both directions, rollback. | opus / high | `read-only-pr-review`, `review-data-migrations` |
 
 ### COO skills
 
 | Skill | Description |
 |-------|-------------|
 | [`coo`](skills/coo/coo/SKILL.md) | Run a feature as a COO orchestrator — story-sized steps, one PR each, reviewer agents gating the next step. |
-| [`read-only-pr-review`](skills/coo/read-only-pr-review/SKILL.md) | Review a PR without changing anything — get the diff, stay read-only, reply with a verdict and graded findings. Loaded by every reviewer agent. |
+| [`read-only-pr-review`](skills/coo/read-only-pr-review/SKILL.md) | Review a PR without changing anything — get the diff, re-review only what changed since your last review, stay read-only, reply with a verdict and graded findings. Loaded by every reviewer agent. |
 | [`review-acceptance`](skills/coo/review-acceptance/SKILL.md) | Review a PR against its step — every acceptance criterion met, the goal delivered, nothing outside the scope. |
 | [`review-architecture`](skills/coo/review-architecture/SKILL.md) | Review a PR's architecture — layer boundaries, dependency direction, where logic and state live, justified abstractions. |
 | [`review-data-migrations`](skills/coo/review-data-migrations/SKILL.md) | Review a PR's data migrations — schema and persisted-format changes, the upgrade path from every shipped version, compatibility in both directions, rollback, and migration tests. |

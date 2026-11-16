@@ -1,7 +1,9 @@
 ---
 name: reviewer-project-practices
-description: Read-only reviewer that checks whether a pull request follows the practices its project defines - the rules in its CLAUDE.md files, contributing docs and other written conventions, and the conventions of its neighbouring code. Give it the PR link, the step goal and acceptance criteria, and the review round; it replies with a verdict and findings. Not for a code review a person asks for.
+description: Read-only reviewer that checks whether a pull request follows the practices its project defines - the rules in its CLAUDE.md files, contributing docs and other written conventions, and the conventions of its neighbouring code. Give it the PR link, the step goal and acceptance criteria, the review round, and on a re-review the commit it last reviewed and its previous findings; it replies with a verdict and findings. Not for a code review a person asks for.
 disallowedTools: Edit, Write, NotebookEdit, Agent
+model: sonnet
+effort: medium
 skills:
   - read-only-pr-review
   - review-project-practices

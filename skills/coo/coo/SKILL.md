@@ -81,6 +81,18 @@ Source: <link or path to the PRD / ADR / doc, or "prompt">
 - Out of scope:
 
 ## Decisions log
+
+## Review log
+| Step | Round | Head SHA | Reviewer | Review | Duration | Verdict | Held back by |
+|------|-------|----------|----------|--------|----------|---------|--------------|
+| 1 | 1 | ... | reviewer-edge-cases | first / follow-up | 5m 40s | approved / changes requested / cannot review | - / 2 new / 1 not resolved |
+
+## Open findings
+### Step 1 - <reviewer> (last reviewed <full SHA>)
+- [should-fix] <file>:<line> - <problem>
+
+## Follow-ups for human review
+- Step 1, <reviewer>: [should-fix] <file>:<line> - <problem>
 ```
 
 Show the plan to the user and get agreement before launching anything. Update the file at every state change.
@@ -136,11 +148,21 @@ The step moves to review when the implementer's direct message reports the PR as
 
 ### 3.3 Review round
 
-Settle the set of reviewers for this PR (see "Reviewer agents"): the core reviewers plus the conditional ones that apply. Launch them all in parallel, each as its own agent in a fresh context. **Wait until all of them have finished.** Nothing goes back to the implementer while a reviewer is still running: partial feedback makes the implementer change code that another reviewer is still reading.
+Settle the set of reviewers for this PR (see "Reviewer agents"): the core reviewers, or the light set, plus the conditional ones that apply. Launch them all in parallel, each as its own agent in a fresh context, with the request described under "Launching a reviewer". **Wait until all of them have finished.** Nothing goes back to the implementer while a reviewer is still running: partial feedback makes the implementer change code that another reviewer is still reading.
+
+As each reviewer returns, add its row to the review log in the feature file:
+
+- **Review** - `first` or `follow-up`, after the request it was sent.
+- **Duration** - the duration the agent's result reports, or else the time from its launch to its result.
+- **Held back by** - for `changes requested`, how many new findings and how many `not resolved` previous findings hold the PR back; `-` otherwise.
+
+Then replace that reviewer's entry under "Open findings" with what the next round has to check: the commit it reviewed, and its `blocker` and `should-fix` findings that still hold the PR back, verbatim. For a first review that is every `blocker` and `should-fix`; for a follow-up review, the previous findings it marked `not resolved` and its new blockers. An approval leaves the entry with no findings. A `Cannot review` reply leaves the entry as it was.
 
 ### 3.4 Aggregate and return to the implementer
 
 Aggregating is the COO's job. Merge the reviewers' output into one report without adding opinions of its own: group by severity, merge duplicates (keeping which reviewers raised them), and flag contradictions between reviewers rather than resolving them. A contradiction the implementer cannot settle goes to the user.
+
+The report carries what holds the PR back, plus the nits of first reviews. A previous finding marked `not resolved` goes under its original severity. New `should-fix` and `nit` findings from a follow-up review do not hold the PR back and do not go to the implementer: add them to "Follow-ups for human review" in the feature file instead. Sending them would start another change and another round over findings that were not part of the agreement.
 
 ```markdown
 # Review of PR <link> - round <n>
@@ -159,13 +181,13 @@ Send a message to COO session <this session's id> with SendMessage, as in your b
 
 Send the report to **the same session that implemented the step**, by its id, since it has the context to fix things quickly. If that session can no longer be reached, launch a new session (never a subagent) with the original brief, the PR link and the report, and record its id.
 
-The implementer fixes, pushes to the same PR and messages the COO directly. When that message arrives, record the new SHA and run a new review round with the same set of reviewers again, adding any conditional reviewer whose area the fix now touches: a fix made for one reviewer can break something another reviewer had approved, and agreement only counts if it is about the same state of the PR.
+The implementer fixes, pushes to the same PR and messages the COO directly. When that message arrives, record the new SHA and run a new review round with the same set of reviewers again, adding any conditional reviewer whose area the fix now touches, and the core set when a PR that had the light set now changes a file outside it: a fix made for one reviewer can break something another reviewer had approved, and agreement only counts if it is about the same state of the PR.
 
 After three rounds without agreement, stop and bring the disagreement to the user instead of looping.
 
 ### 3.5 Ready for human review
 
-The PR is **ready for human review once all reviewer agents concur**: every reviewer launched for this PR, core and conditional, returned `approved` in the same round, on the current state of the PR. Set status to `ready for human review`, tell the user, and move on to the next step.
+The PR is **ready for human review once all reviewer agents concur**: every reviewer launched for this PR, core and conditional, returned `approved` in the same round, on the current state of the PR. Set status to `ready for human review`, tell the user, with the step's follow-ups for human review if it has any, and move on to the next step.
 
 If the human review later asks for changes on an earlier step, route them to that step's implementer session by its id. When its direct message reports the push, run a review round on the result, and have the steps stacked on top of it rebased before they continue.
 
@@ -182,15 +204,24 @@ The COO knows **which reviewer agents to launch**, one per review area. It does 
 | `reviewer-project-practices` | Practices defined in the project |
 | `reviewer-acceptance` | The PR does what the step asked, all of it and nothing more |
 
+### Light set (PRs with no code)
+
+A PR whose changed files are **all** documentation or binary assets gets only `reviewer-acceptance` and `reviewer-project-practices`, and no conditional reviewer:
+
+- Documentation: Markdown, plain-text and other prose files, such as a README, a changelog, a licence, or files under a docs folder.
+- Binary assets: images, icons, fonts, audio and video.
+
+The size of the PR is not the criterion: a one-line change to code can break as much as a large one. Everything else gets the core set, however small the change: source code, tests, build and dependency files, CI configuration, manifests, scripts, configuration, and resource files the code reads, such as strings, layouts or JSON. When a path leaves the kind of a file open, it gets the core set.
+
 ### Conditional reviewers (only when the PR touches the area)
 
-| Agent | Launch when the PR touches |
-|-------|----------------------------|
-| `reviewer-security` | Auth, secrets, user input, network, storage of sensitive data, permissions |
-| `reviewer-performance` | Hot paths, queries, large collections, rendering, startup |
-| `reviewer-data-migrations` | Schema changes, persisted formats, backwards compatibility |
+| Agent | Launch when the step or a changed file touches |
+|-------|-----------------------------------------------|
+| `reviewer-security` | Authentication, sessions, tokens or authorization; secrets, keys or credentials; input from users, deep links, intents, the clipboard, files or the network that reaches a query, command, file path, URL, parser or web view; a new network client or endpoint, or network or TLS configuration; storage of personal or sensitive data; requested permissions, exported components, backup or sharing rules |
+| `reviewer-performance` | Code run per frame, per list item, per request, at startup, or in a loop over data with no small fixed bound; database queries, indexes, and the code that calls them; loading or transforming images or large files; rendering work added to list items, animations or frame callbacks |
+| `reviewer-data-migrations` | A database schema, entity or migration; a class that is serialized and stored or cached; preference or DataStore keys, types or protos; a file format the app writes; a wire format that clients or other services store |
 
-Choosing which conditional reviewers apply is a management decision, not a review: make it from the step's subject and the PR's list of changed files, without reading the diff. When in doubt, launch the reviewer; an unnecessary review costs less than a missed one. Record the chosen set in the feature file. A conditional reviewer launched for a PR counts like a core one from then on: it runs in every later round and its approval is required.
+Choosing which conditional reviewers apply is a management decision, not a review: make it from the step's subject and the PR's list of changed files, without reading the diff. Launch a reviewer when you can name the trigger from its row that the PR touches, or when a changed file could hold one of its triggers and its path does not settle it, such as a repository, DAO, API client or manifest file: an unnecessary review costs less than a missed one. A word in the step's title is not a trigger by itself: a link to a fixed URL touches none of the security triggers by being about a URL. Record the chosen set in the feature file, with the trigger behind each conditional reviewer. A conditional reviewer launched for a PR counts like a core one from then on: it runs in every later round and its approval is required.
 
 ### Launching a reviewer
 
@@ -202,7 +233,17 @@ Step goal and acceptance criteria: <from the step brief>
 Review round: <n>
 ```
 
-Do not add review instructions, checklists or skill names to that message, and do not pass the implementer's summary of the work.
+For a reviewer that has already given a verdict on this PR, add its entry from "Open findings":
+
+```markdown
+Previously reviewed commit: <full SHA it last reviewed>
+Your previous findings:
+- <its open findings, verbatim, or "none">
+```
+
+Those two lines make the review a follow-up: the reviewer checks its own previous findings and reviews only what changed since that commit, which keeps later rounds short and stops findings on code that did not change from reopening the round. A reviewer new to the PR, or whose only reply so far was `Cannot review`, gets the first three lines alone.
+
+Do not add review instructions, checklists or skill names to that message. Do not pass the implementer's summary of the work, or another reviewer's findings: a reviewer only ever sees its own.
 
 What the COO relies on from every reviewer:
 - It is **read-only**: it points out problems and never edits code, pushes, comments on the PR or approves it.
@@ -214,7 +255,7 @@ If a reviewer agent that should run does not exist in the current environment, d
 
 ## Phase 4 - Close out
 
-When the last step is ready for human review, give the user a short wrap-up: what was delivered per step with PR links and their merge state, the order in which stacked PRs should be merged, decisions taken along the way, and anything deliberately left out or deferred.
+When the last step is ready for human review, give the user a short wrap-up: what was delivered per step with PR links and their merge state, the order in which stacked PRs should be merged, decisions taken along the way, the follow-ups for human review, and anything deliberately left out or deferred. Close with a summary of the review log: rounds per step, the slowest reviewer on average, and which reviewers held PRs back most often, with new findings and `not resolved` ones counted apart.
 
 ## Keeping the user informed
 
