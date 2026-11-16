@@ -15,32 +15,46 @@ what you install: point the CLI at one and you get its skills and nothing else.
 
 ## Install
 
-Install a bucket for every project on this machine, without prompts:
+You need [Node.js](https://nodejs.org) (for `npx`) and git.
+
+To install a bucket globally, so every project on your computer can use it:
 
 ```bash
 npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/engineering -g -s '*' --agent claude-code
 ```
 
-Replace `engineering` with any bucket from the table above. The `coo` bucket also needs its
-agents, which the CLI does not install: see [Install the COO](#install-the-coo).
+Replace `engineering` with any bucket from the table above. For the `coo` bucket, follow
+[Install the COO](#install-the-coo) instead: it also needs agents that this command does not
+install.
 
-- `-g` installs into each agent's own directory (`~/.claude/skills/` for Claude Code). Drop it
-  to install into the current project instead.
-- `-s '*'` takes the whole bucket. `-s debug -s refactor` takes only those skills.
-- `--agent claude-code` installs for Claude Code only.
-- Without `-y`, the CLI prompts for the scope, the agents, the skills, and symlink vs copy.
-  Answering up front with these flags means copies, not symlinks.
+What the flags do:
 
-`npx skills add pvgloria/skills -g` with no bucket path installs every bucket, `personal`
-included.
+- `-g` installs globally, into `~/.claude/skills/`. Leave it out to install into the current
+  project only, in its `.claude/skills/`.
+- `-s '*'` installs every skill in the bucket. `-s debug -s refactor` installs only those two.
+- `--agent claude-code` installs for Claude Code only, not for other AI tools.
+- `-y` skips the questions. Without it, the CLI asks where to install, for which tools, which
+  skills, and whether to copy the files or link to them. With these flags, it copies them.
 
-Update everything the CLI installed, these skills and third-party ones alike:
+To install every bucket at once, `personal` included, leave out the bucket path:
+`npx skills add pvgloria/skills -g`.
+
+### Update
+
+To update every skill the CLI installed, including ones from other repos, run this for global
+skills:
 
 ```bash
 npx skills update -g
 ```
 
-List the installed skills:
+And this from a project's root folder for that project's skills:
+
+```bash
+npx skills update -p
+```
+
+To see what is installed:
 
 ```bash
 npx skills list
@@ -98,50 +112,68 @@ other bucket.
 
 ### Install the COO
 
-The COO is the `coo` bucket plus the reviewer agents in [`skills/coo/agents/`](skills/coo/agents/),
-installed in the same scope. The `skills` CLI never installs or updates agents, so they are
-copied from a clone of this repo:
+The COO has two parts: the skills in the `coo` bucket and the reviewer agents in
+[`skills/coo/agents/`](skills/coo/agents/). Install both the same way, either in a project or
+globally.
+
+The `skills` CLI does not install or update agents, so you copy them yourself from a local copy
+of this repo. Clone it once per computer:
 
 ```bash
 git clone --depth 1 https://github.com/pvgloria/skills ~/.cache/pvgloria-skills
 ```
 
-**Machine** — every project on this computer:
-
-```bash
-mkdir -p ~/.claude/agents && cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md ~/.claude/agents/
-```
-
-```bash
-npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/coo -g -s '*' --agent claude-code
-```
-
-**Project** — run from the project root, then commit `.claude/agents/`, `.claude/skills/` and the
-`skills-lock.json` the CLI writes. Cloud sessions (Claude Code on the web) load only these
-folders from the repository, never `~/.claude/`, so this is the only install they see:
+**In a project.** Use this if you work in Claude Code on the web: cloud sessions read skills and
+agents only from the project's repository, never from `~/.claude/`. From the project's root
+folder, copy the agents:
 
 ```bash
 mkdir -p .claude/agents && cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md .claude/agents/
 ```
 
+Then install the skills:
+
 ```bash
 npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/coo -s '*' --agent claude-code
 ```
 
-**Update** — `npx skills update` refreshes the skills. For the agents, pull the clone and copy
-them again:
+Commit `.claude/agents/`, `.claude/skills/` and `skills-lock.json`. Anyone who clones the
+project then has the COO, with nothing to install.
+
+**Globally.** Every project on your computer can use it, but cloud sessions cannot. Copy the
+agents:
+
+```bash
+mkdir -p ~/.claude/agents && cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md ~/.claude/agents/
+```
+
+Then install the skills:
+
+```bash
+npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/coo -g -s '*' --agent claude-code
+```
+
+**To update**, run `npx skills update -p` in the project (or `-g` for a global install) for the
+skills. For the agents, get the latest version of the repo:
 
 ```bash
 git -C ~/.cache/pvgloria-skills pull
 ```
 
+Then copy the agents again, into `.claude/agents/` in a project or `~/.claude/agents/` globally:
+
+```bash
+cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md .claude/agents/
+```
+
 ### Reviewer agents
 
-Each reviewer is a read-only Claude Code subagent that covers one area. The core reviewers run
-on every PR with code; a PR of only documentation or binary assets gets acceptance and project
-practices alone. The conditional ones run only when the PR touches their area. An agent's file
-holds only its role, its area and the two skills it preloads: `read-only-pr-review`, shared by
-all, and its own `review-<area>`. Its frontmatter sets the model and effort it runs at.
+Each reviewer is a Claude Code subagent that checks one area of a PR and never changes
+anything. Some run on every PR. If a PR has only documentation or images, only acceptance and
+project practices run. The rest run only when the PR touches their area.
+
+Every agent loads two skills: `read-only-pr-review`, which they all share, and its own
+`review-<area>`. Each agent's file sets the model and effort it runs with.
 
 | Agent | Runs on | Area | Model / effort | Skills |
 |-------|---------|------|----------------|--------|
