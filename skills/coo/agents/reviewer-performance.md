@@ -2,8 +2,8 @@
 name: reviewer-performance
 description: Read-only reviewer that checks whether a pull request makes its code slower or heavier - work on hot paths and the main thread, query count and shape, large collections, rendering, startup - and asks for a measurement where a speed or memory claim needs one. Give it the PR link, the step goal and acceptance criteria, the review round, and on a re-review the commit it last reviewed and its previous findings; it replies with a verdict and findings. Not for a code review a person asks for.
 disallowedTools: Edit, Write, NotebookEdit, Agent
-model: opus
-effort: high
+model: sonnet
+effort: medium
 skills:
   - read-only-pr-review
   - review-performance
