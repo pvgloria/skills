@@ -100,12 +100,17 @@ writing or reviewing code itself:
 1. **Plan** — agrees the problem, goal and constraints with you, splits the feature into
    story-sized steps, and keeps the plan and its state in a feature file.
 2. **Delegate** — hands each step to its own Claude Code implementer session, which ends with
-   a PR.
+   a PR. The plan gives each step its implementer's model and effort: Sonnet for steps that
+   follow a shape the code already has, Opus for the rest.
 3. **Review** — launches the reviewer agents on the PR in parallel, waits for all of them, and
    sends their merged findings back to the same implementer. From the second round on, each
-   reviewer checks its own previous findings and reviews only what changed since.
+   reviewer checks its own previous findings and reviews only what changed since, on Sonnet.
 4. **Advance** — once every reviewer approves, marks the PR ready for human review and starts
    the next step, stacked on the previous one if it isn't merged yet.
+
+Along the way it keeps a usage log in the feature file, with what each implementer session and
+each review round cost, and sums it up per step, per implementer model and per reviewer when
+the feature is done.
 
 Everything it needs lives in the [`skills/coo/`](skills/coo/) bucket, which depends on no
 other bucket.
@@ -173,7 +178,8 @@ anything. Some run on every PR. If a PR has only documentation or images, only a
 project practices run. The rest run only when the PR touches their area.
 
 Every agent loads two skills: `read-only-pr-review`, which they all share, and its own
-`review-<area>`. Each agent's file sets the model and effort it runs with.
+`review-<area>`. Each agent's file sets the model and effort of its first review on a PR. From
+the second round on, `coo` runs its follow-up reviews on sonnet / medium.
 
 | Agent | Runs on | Area | Model / effort | Skills |
 |-------|---------|------|----------------|--------|

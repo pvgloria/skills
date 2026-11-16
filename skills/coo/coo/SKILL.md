@@ -20,7 +20,7 @@ Does:
 - Decompose the feature into steps and keep the plan up to date.
 - Write the brief for each step and launch the session that executes it.
 - Launch the reviewer agents when a PR exists, wait for all of them, aggregate their findings and pass them to the implementer.
-- Track state: which step is active, implementer session id, PR link and head SHA, review round, verdicts.
+- Track state: which step is active, implementer session id, PR link and head SHA, review round, verdicts, and what each session and review round used.
 - Escalate to the user when a decision is theirs.
 
 Does not:
@@ -58,6 +58,13 @@ Good steps:
 - Leave the code working when applied in order.
 - Are small enough for one PR a reviewer can hold in their head. If a step needs "and" twice in its title, split it.
 
+Give each step the model and effort its implementer session runs with:
+
+- `sonnet` / `high` for a step that follows a shape the code already has, such as a screen, endpoint or entity like existing ones, or a change confined to one module.
+- `opus` / `high` for a step that sets a shape later steps build on, or that touches concurrency, stored data, security-sensitive code or several modules at once.
+
+When a step fits neither clearly, choose `opus`. The choice holds for the step's whole life, re-launched implementers included, unless the user changes it.
+
 Write the plan to a feature file (default `.claude/features/<feature-slug>.md`, or wherever the project keeps such documents) so the state survives a lost session:
 
 ```markdown
@@ -70,22 +77,30 @@ Source: <link or path to the PRD / ADR / doc, or "prompt">
 ## Constraints / out of scope
 
 ## Steps
-| # | Step | Status | Session | PR | Head SHA | Base branch | Reviewers | Review round |
-|---|------|--------|---------|----|----------|-------------|-----------|--------------|
-| 1 | ...  | pending / in progress / in review / changes requested / ready for human review / merged | | | | | | |
+| # | Step | Status | Implementer | Session | PR | Head SHA | Base branch | Reviewers | Review round |
+|---|------|--------|-------------|---------|----|----------|-------------|-----------|--------------|
+| 1 | ...  | pending / in progress / in review / changes requested / ready for human review / merged | sonnet / high | | | | | | |
 
 ## Step details
 ### Step 1 - <title>
 - Goal:
 - Acceptance criteria:
 - Out of scope:
+- Implementer: <model> / <effort> - <why>
 
 ## Decisions log
 
 ## Review log
-| Step | Round | Head SHA | Reviewer | Review | Duration | Verdict | Held back by |
-|------|-------|----------|----------|--------|----------|---------|--------------|
-| 1 | 1 | ... | reviewer-edge-cases | first / follow-up | 5m 40s | approved / changes requested / cannot review | - / 2 new / 1 not resolved |
+| Step | Round | Head SHA | Reviewer | Review | Model / effort | Duration | Tokens | Verdict | Findings | Held back by |
+|------|-------|----------|----------|--------|----------------|----------|--------|---------|----------|--------------|
+| 1 | 1 | ... | reviewer-edge-cases | first / follow-up | opus / high | 5m 40s | 85k / - | approved / changes requested / cannot review | 0/1/2 | - / 2 new / 1 not resolved |
+
+## Usage log
+| Step | Round | Session | Model / effort | Cost (USD) | Tokens in / cache read / cache write / out |
+|------|-------|---------|----------------|------------|--------------------------------------------|
+| - | - | COO | opus / xhigh | 2.10 | 1k / 3.2M / 210k / 25k |
+| 1 | 1 | <implementer session id> | sonnet / high | 4.80 | 2k / 9.1M / 640k / 70k |
+| 1 | 1 | COO | opus / xhigh | 6.30 | 1k / 16M / 410k / 46k |
 
 ## Open findings
 ### Step 1 - <reviewer> (last reviewed <full SHA>)
@@ -95,7 +110,7 @@ Source: <link or path to the PRD / ADR / doc, or "prompt">
 - Step 1, <reviewer>: [should-fix] <file>:<line> - <problem>
 ```
 
-Show the plan to the user and get agreement before launching anything. Update the file at every state change.
+Show the plan to the user, with each step's implementer model and effort, and get agreement before launching anything. Update the file at every state change.
 
 ## Phase 3 - Execute one step at a time
 
@@ -107,7 +122,7 @@ For each step:
 
 ### 3.1 Delegate
 
-Launch one implementation session with a self-contained brief, and record its session id in the feature file. The implementer knows nothing about this conversation, so the brief must carry everything:
+Launch one implementation session with the step's model and effort, set through the harness's options for starting it (for example its start-session tool's `model` and `effort`), and a self-contained brief. Record its session id in the feature file. The implementer knows nothing about this conversation, so the brief must carry everything:
 
 ```markdown
 # Step <n> of <total>: <title>
@@ -128,6 +143,7 @@ You remain the implementer of this step for its whole life: review rounds and an
 COO session id: <this session's id>
 Every time you open the PR or push to it, including fixes during review rounds and changes from human review, send a message to that session id with SendMessage, or whatever tool the harness offers for messaging another session. Its first line is:
 `Step <n> PR <link> at <short SHA>: <opened | pushed fixes for round N>`
+If the push rebased or force-pushed the branch, end that line with `(rebased)`.
 Your end-of-turn reply still goes out, but it is not the signal the COO waits for.
 
 ## Definition of done
@@ -148,13 +164,18 @@ The step moves to review when the implementer's direct message reports the PR as
 
 ### 3.3 Review round
 
-Settle the set of reviewers for this PR (see "Reviewer agents"): the core reviewers, or the light set, plus the conditional ones that apply. Launch them all in parallel, each as its own agent in a fresh context, with the request described under "Launching a reviewer". **Wait until all of them have finished.** Nothing goes back to the implementer while a reviewer is still running: partial feedback makes the implementer change code that another reviewer is still reading.
+Settle the set of reviewers for this PR (see "Reviewer agents"): the core reviewers, or the light set, plus the conditional ones that apply. Add this session's row to the usage log (see "Usage log"), then launch them all in parallel, each as its own agent in a fresh context, with the request described under "Launching a reviewer". **Wait until all of them have finished.** Nothing goes back to the implementer while a reviewer is still running: partial feedback makes the implementer change code that another reviewer is still reading.
 
 As each reviewer returns, add its row to the review log in the feature file:
 
 - **Review** - `first` or `follow-up`, after the request it was sent.
+- **Model / effort** - what it ran with: the agent's own, or the follow-up override (see "Launching a reviewer").
 - **Duration** - the duration the agent's result reports, or else the time from its launch to its result.
+- **Tokens** - the tokens the agent's result reports, or `-` when it reports none. The round's cost is in the usage log either way.
+- **Findings** - its new findings counted by severity, as `blocker/should-fix/nit`; `-` for `Cannot review`.
 - **Held back by** - for `changes requested`, how many new findings and how many `not resolved` previous findings hold the PR back; `-` otherwise.
+
+When the last reviewer of the round has returned, add the implementer's row to the usage log (see "Usage log").
 
 Then replace that reviewer's entry under "Open findings" with what the next round has to check: the commit it reviewed, and its `blocker` and `should-fix` findings that still hold the PR back, verbatim. For a first review that is every `blocker` and `should-fix`; for a follow-up review, the previous findings it marked `not resolved` and its new blockers. An approval leaves the entry with no findings. A `Cannot review` reply leaves the entry as it was.
 
@@ -178,7 +199,7 @@ Send a message to COO session <this session's id> with SendMessage, as in your b
 `Step <step> PR <link> at <short SHA>: pushed fixes for round <n>`
 ```
 
-Send the report to **the same session that implemented the step**, by its id, since it has the context to fix things quickly. If that session can no longer be reached, launch a new session (never a subagent) with the original brief, the PR link and the report, and record its id.
+Send the report to **the same session that implemented the step**, by its id, since it has the context to fix things quickly. If that session can no longer be reached, launch a new session (never a subagent) with the step's model and effort, the original brief, the PR link and the report, and record its id.
 
 The implementer fixes, pushes to the same PR and messages the COO directly. When that message arrives, record the new SHA and run a new review round with the same set of reviewers again, adding any conditional reviewer whose area the fix now touches, and the core set when a PR that had the light set now changes a file outside it: a fix made for one reviewer can break something another reviewer had approved, and agreement only counts if it is about the same state of the PR.
 
@@ -242,6 +263,8 @@ Your previous findings:
 
 Those two lines make the review a follow-up: the reviewer checks its own previous findings and reviews only what changed since that commit, which keeps later rounds short and stops findings on code that did not change from reopening the round. A reviewer new to the PR, or whose only reply so far was `Cannot review`, gets the first three lines alone.
 
+Launch a follow-up review on model `sonnet` with effort `medium`, overriding the agent's own through the harness's launch options (for example the Agent tool's `model` and `effort`). Checking its own findings and the change since one commit needs less than a first review. Every other review runs on the agent's own model and effort. That includes a follow-up on a PR rebased or force-pushed since the reviewer's previous commit, because that reviewer then reviews the whole PR again. You know of a rebase when you asked for it, or when the implementer's message marks the push `(rebased)`.
+
 Do not add review instructions, checklists or skill names to that message. Do not pass the implementer's summary of the work, or another reviewer's findings: a reviewer only ever sees its own.
 
 What the COO relies on from every reviewer:
@@ -252,9 +275,28 @@ A reviewer that cannot do its review replies with a single line and no verdict: 
 
 If a reviewer agent that should run does not exist in the current environment, do not improvise a replacement with a generic agent: tell the user which one is missing and ask how to proceed. If the project defines further reviewer agents, the user adds them to the set for that feature and the COO launches them like the others.
 
+## Usage log
+
+The usage log records what the feature used, so the user can see where the tokens go and compare implementer models. Each row holds what one session used between two reads.
+
+Read a session's usage from what the harness reports for it, for example the `usage` the get-session tool returns: the cost in USD and the input, cache-read, cache-write and output tokens. That usage is cumulative and includes the session's subagents, but it counts a turn only once the turn has ended. A read made during a turn therefore leaves out that turn, and whatever a subagent used since the session's previous turn ended. A row holds the difference from the previous read of the same session; a session's first row holds all its usage so far.
+
+- **Implementer.** When the last reviewer of a round has returned, read the session of the implementer whose push the round reviewed. Add a row with the step, that round and the session's model and effort: round 1 is the implementation, a later round the fixes it reviewed. The implementer's turn has normally ended by then; if not, the rest lands in its next row.
+- **COO.** Read this session right before launching a round's reviewers, and add a row for what it used since its previous read. The first row has step and round `-`: it covers planning and the first delegation. Every later row carries the step and number of the previous round: it covers that round's reviewers and this session's turns up to this launch. Re-launching one reviewer within a round is not a read.
+- **Last reads.** See "Phase 4 - Close out".
+
+Write `-` in a row when the harness reports no usage for the session. Costs are at API list prices: on a subscription they measure use of the plan's limits, not a bill.
+
 ## Phase 4 - Close out
 
-When the last step is ready for human review, give the user a short wrap-up: what was delivered per step with PR links and their merge state, the order in which stacked PRs should be merged, decisions taken along the way, the follow-ups for human review, and anything deliberately left out or deferred. Close with a summary of the review log: rounds per step, the slowest reviewer on average, and which reviewers held PRs back most often, with new findings and `not resolved` ones counted apart.
+When the last step is ready for human review, give the user a short wrap-up: what was delivered per step with PR links and their merge state, the order in which stacked PRs should be merged, decisions taken along the way, the follow-ups for human review, and anything deliberately left out or deferred. Close with a summary of the review log: rounds per step, the slowest reviewer on average, which reviewers held PRs back most often, with new findings and `not resolved` ones counted apart, and which reviewers never raised a blocker or should-fix.
+
+The last round's reviewers enter this session's usage only after the current turn ends, so sum up the usage log in a later turn: schedule a message to this session a minute out if the harness offers a way (for example a send-later tool), or else do it at the user's next message, and say so in the wrap-up. In that turn, read this session and every implementer session a last time, add their rows, and give the user:
+
+- The total cost, split into planning, implementers and review rounds.
+- For each step: its implementer's model and effort, its review rounds, and the cost of its implementer and of its review rounds.
+- For each implementer model: the average cost and review rounds per step.
+- For each reviewer: its average duration, and its average tokens where the review log has them.
 
 ## Keeping the user informed
 
