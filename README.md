@@ -100,17 +100,20 @@ writing or reviewing code itself:
 1. **Plan** — agrees the problem, goal and constraints with you, splits the feature into
    story-sized steps, and keeps the plan and its state in a feature file.
 2. **Delegate** — hands each step to its own Claude Code implementer session, which ends with
-   a PR. The plan gives each step its implementer's model and effort: Sonnet for steps that
-   follow a shape the code already has, Opus for the rest.
-3. **Review** — launches the reviewer agents on the PR in parallel, waits for all of them, and
-   sends their merged findings back to the same implementer. From the second round on, each
-   reviewer checks its own previous findings and reviews only what changed since, on Haiku.
-4. **Advance** — once every reviewer approves, marks the PR ready for human review and starts
-   the next step, stacked on the previous one if it isn't merged yet.
+   a PR. The plan gives each step its implementer's model and effort: Sonnet by default, Opus
+   only for steps that set a shape later steps build on or touch concurrency, stored data or
+   security.
+3. **Review** — runs one review round per PR: launches the reviewer agents in parallel, waits
+   silently for all of them, and sends their blockers and should-fix findings to the same
+   implementer once. There is no second round.
+4. **Advance** — once the round is done and the implementer has pushed its fixes, marks the PR
+   ready for human review and starts the next step, stacked on the previous one if it isn't
+   merged yet. For each step it lists what you have to validate: the fixes made after the
+   review, which no agent checked, every finding left unfixed and every nit.
 
 Along the way it keeps a usage log in the feature file, with what each implementer session and
-each review round cost, and sums it up per step, per implementer model and per reviewer when
-the feature is done.
+each review round cost, and sums it up per step and per implementer model when the feature is
+done.
 
 Everything it needs lives in the [`skills/coo/`](skills/coo/) bucket, which depends on no
 other bucket.
@@ -174,19 +177,18 @@ cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md .claude/agents/
 ### Reviewer agents
 
 Each reviewer is a Claude Code subagent that checks one area of a PR and never changes
-anything. Some run on every PR. If a PR has only documentation or images, only acceptance and
-project practices run. The rest run only when the PR touches their area.
+anything. Edge cases and acceptance run on every PR with code. If a PR has only documentation or
+images, only acceptance runs. Security, performance and data migrations run only when the PR
+clearly touches their area, and architecture only when you ask for it.
 
 Every agent loads two skills: `read-only-pr-review`, which they all share, and its own
-`review-<area>`. Each agent's file sets the model and effort of its first review on a PR. From
-the second round on, `coo` runs its follow-up reviews on haiku / medium.
+`review-<area>`. Each agent's file sets the model and effort it runs with.
 
 | Agent | Runs on | Area | Model / effort | Skills |
 |-------|---------|------|----------------|--------|
 | [`reviewer-acceptance`](skills/coo/agents/reviewer-acceptance.md) | Every PR | The PR does what the step asked, all of it and nothing more. | sonnet / medium | `read-only-pr-review`, `review-acceptance` |
-| [`reviewer-architecture`](skills/coo/agents/reviewer-architecture.md) | Every PR with code | Architecture and the good practices of the project's stack. | sonnet / medium | `read-only-pr-review`, `review-architecture` |
+| [`reviewer-architecture`](skills/coo/agents/reviewer-architecture.md) | When you ask | Architecture and the good practices of the project's stack. | sonnet / medium | `read-only-pr-review`, `review-architecture` |
 | [`reviewer-edge-cases`](skills/coo/agents/reviewer-edge-cases.md) | Every PR with code | Edge cases: covered and not breaking. | sonnet / medium | `read-only-pr-review`, `review-edge-cases` |
-| [`reviewer-project-practices`](skills/coo/agents/reviewer-project-practices.md) | Every PR | Practices defined in the project. | sonnet / medium | `read-only-pr-review`, `review-project-practices` |
 | [`reviewer-security`](skills/coo/agents/reviewer-security.md) | When touched | Security: auth, secrets, untrusted input, network and TLS, sensitive data at rest, permissions. | sonnet / high | `read-only-pr-review`, `review-security` |
 | [`reviewer-performance`](skills/coo/agents/reviewer-performance.md) | When touched | Performance: hot paths, queries, large collections, rendering, startup. | sonnet / medium | `read-only-pr-review`, `review-performance` |
 | [`reviewer-data-migrations`](skills/coo/agents/reviewer-data-migrations.md) | When touched | Data migrations: schema and persisted-format changes, upgrade from every shipped version, compatibility in both directions, rollback. | sonnet / high | `read-only-pr-review`, `review-data-migrations` |
@@ -195,14 +197,13 @@ the second round on, `coo` runs its follow-up reviews on haiku / medium.
 
 | Skill | Description |
 |-------|-------------|
-| [`coo`](skills/coo/coo/SKILL.md) | Run a feature as a COO orchestrator — story-sized steps, one PR each, reviewer agents gating the next step. |
+| [`coo`](skills/coo/coo/SKILL.md) | Run a feature as a COO orchestrator — story-sized steps, one PR and one review round each, reviewer agents gating the next step. |
 | [`read-only-pr-review`](skills/coo/read-only-pr-review/SKILL.md) | Review a PR without changing anything — get the diff, re-review only what changed since your last review, stay read-only, reply with a verdict and graded findings. Loaded by every reviewer agent. |
 | [`review-acceptance`](skills/coo/review-acceptance/SKILL.md) | Review a PR against its step — every acceptance criterion met, the goal delivered, nothing outside the scope. |
 | [`review-architecture`](skills/coo/review-architecture/SKILL.md) | Review a PR's architecture — layer boundaries, dependency direction, where logic and state live, justified abstractions. |
 | [`review-data-migrations`](skills/coo/review-data-migrations/SKILL.md) | Review a PR's data migrations — schema and persisted-format changes, the upgrade path from every shipped version, compatibility in both directions, rollback, and migration tests. |
 | [`review-edge-cases`](skills/coo/review-edge-cases/SKILL.md) | Review a PR's edge cases — empty, null, boundary and large inputs, failures, cancellation, concurrency, and whether their tests assert the behaviour. |
 | [`review-performance`](skills/coo/review-performance/SKILL.md) | Review a PR's performance — work on hot paths, query count and shape, large collections, rendering and startup, and a measurement where a speed or memory claim needs one. |
-| [`review-project-practices`](skills/coo/review-project-practices/SKILL.md) | Review a PR against its project's own rules — CLAUDE.md files, contributing docs and other written conventions, and the conventions of the neighbouring code. |
 | [`review-security`](skills/coo/review-security/SKILL.md) | Review a PR's security — authentication and authorization on its entry points, secrets, untrusted input, network and TLS, sensitive data at rest, and permissions. |
 
 Each `review-<area>` skill is loaded by the `reviewer-<area>` agent of the same area.

@@ -77,9 +77,7 @@ The repo is not a plugin, and the `skills` CLI does not install agents: they are
 - **Read-only.** Every reviewer agent sets `disallowedTools: Edit, Write, NotebookEdit, Agent`
   and keeps Bash and the GitHub tools, which it needs to read the PR.
 - **Model and effort.** Every reviewer agent sets `model` and `effort` in its frontmatter, so it
-  never inherits the launching session's. The README's agents table shows both. They hold for a
-  first review: `coo` launches follow-up reviews on `sonnet` / `medium`, as its skill says, and
-  the agent files do not mention it.
+  never inherits the launching session's. The README's agents table shows both.
 
 ### Where agents are listed
 
