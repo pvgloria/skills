@@ -263,7 +263,7 @@ Your previous findings:
 
 Those two lines make the review a follow-up: the reviewer checks its own previous findings and reviews only what changed since that commit, which keeps later rounds short and stops findings on code that did not change from reopening the round. A reviewer new to the PR, or whose only reply so far was `Cannot review`, gets the first three lines alone.
 
-Launch a follow-up review on model `sonnet` with effort `medium`, overriding the agent's own through the harness's launch options (for example the Agent tool's `model` and `effort`). Checking its own findings and the change since one commit needs less than a first review. Every other review runs on the agent's own model and effort. That includes a follow-up on a PR rebased or force-pushed since the reviewer's previous commit, because that reviewer then reviews the whole PR again. You know of a rebase when you asked for it, or when the implementer's message marks the push `(rebased)`.
+Launch a follow-up review on model `haiku` with effort `medium`, overriding the agent's own through the harness's launch options (for example the Agent tool's `model` and `effort`). Checking its own findings and the change since one commit needs less than a first review. Every other review runs on the agent's own model and effort. That includes a follow-up on a PR rebased or force-pushed since the reviewer's previous commit, because that reviewer then reviews the whole PR again. You know of a rebase when you asked for it, or when the implementer's message marks the push `(rebased)`.
 
 Do not add review instructions, checklists or skill names to that message. Do not pass the implementer's summary of the work, or another reviewer's findings: a reviewer only ever sees its own.
 
