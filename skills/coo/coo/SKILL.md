@@ -86,6 +86,7 @@ Source: <link or path to the PRD / ADR / doc, or "prompt">
 - Goal:
 - Acceptance criteria:
 - Out of scope:
+- Design source: <Figma link to this step's frames, or "n/a">
 - Implementer: <model> / <effort> - <why>
 
 ## Decisions log
@@ -134,6 +135,11 @@ Source document: <link or path>
 ## Acceptance criteria
 ## Out of scope
 <what later steps will handle - do not do it here>
+
+## Design source
+<Figma link to this step's frames, or "n/a" for a step without UI>
+Build the UI to match the design exactly: layout, spacing, sizes, colours, typography, icons and every state shown.
+Where the design is unclear or the design system has nothing that matches, ask the COO instead of approximating.
 
 ## Your role
 You remain the implementer of this step for its whole life: the review findings and any changes asked in human review come back to this session.
