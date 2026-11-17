@@ -9,7 +9,7 @@ This session is the **Chief Operations Officer (COO)** for one feature. The COO 
 
 Why the separation matters: the COO's context is the only place where the whole feature lives. Filling it with diffs and implementation detail makes it lose the plan. Implementers and reviewers get a narrow brief and a fresh context, which is also what keeps reviews independent of the work they are judging.
 
-Every implementer, including a re-launched one, runs in its own Claude Code session, started with whatever the harness offers for that (for example its start-session tool), and every follow-up goes to that same session by its id. Give it its own worktree when another implementer may be working at the same time, such as step N's implementer handling human-review changes while step N+1 is in progress: two sessions switching branches in one checkout overwrite each other. Never use a subagent from the Agent tool as an implementer: it ends with the COO's session, so review fixes and changes from human review would have no implementer left with the context. If the harness offers no way to start a persistent session, stop and tell the user instead of falling back to a subagent.
+Every implementer, including a re-launched one, runs in its own Claude Code session, started with whatever the harness offers for that (for example its start-session tool), and every follow-up goes to that same session by its id. Implementers work on a branch in the project's own checkout, never in a worktree (for example the start-session tool with `use_worktree: false`), and never in parallel: only one implementer session works at any time, so two sessions never switch branches in the same checkout. The brief tells it to leave the user's uncommitted and untracked files alone and out of its commits. Never use a subagent from the Agent tool as an implementer: it ends with the COO's session, so review fixes and changes from human review would have no implementer left with the context. If the harness offers no way to start a persistent session, stop and tell the user instead of falling back to a subagent.
 
 Reviewers are different on purpose: each is a read-only agent launched in a fresh context, which is what keeps it independent. A read-only exploration for planning can be a subagent too.
 
@@ -114,7 +114,7 @@ Show the plan to the user, with each step's implementer model and effort, and ge
 
 ## Phase 3 - Execute one step at a time
 
-Steps run strictly in sequence. **Do not start step N+1 until step N is ready for human review** (see 3.5): its one review round has run and its implementer has acted on the findings. The gate is the review round, not the merge: human review and merge happen at the user's pace and do not block the next step.
+Steps run strictly in sequence, one at a time, with no parallel work. **Do not start step N+1 until step N is ready for human review** (see 3.5): its one review round has run and its implementer has acted on the findings, so nothing on step N is still in progress. The gate is the review round, not the merge: human review and merge happen at the user's pace and do not block the next step.
 
 Because step N may not be merged yet when step N+1 starts, choose the base branch for N+1 accordingly: the main base branch if step N is already merged, otherwise step N's branch (a stacked PR). Record the base in the feature file.
 
@@ -212,7 +212,7 @@ When the implementer's message arrives, record the new SHA, fill in the round's 
 
 The PR is **ready for human review once its review round is done**: right after the round when no reviewer raised a blocker or should-fix, or else when the implementer's message reports what it fixed. Set status to `ready for human review`, tell the user, with the step's entry from "Follow-ups for human review": what was fixed after the review and is theirs to validate, what was not fixed, and the nits. Then move on to the next step.
 
-If the human review later asks for changes on an earlier step, route them to that step's implementer session by its id. When its direct message reports the push, record the new SHA; the PR has had its review round, so there is no new one. Tell the user the change is pushed and is theirs to validate: no agent reviews it. Have the steps stacked on top of it rebased before they continue.
+If the human review later asks for changes on an earlier step, route them to that step's implementer session by its id, only once no other implementer is working: wait for the step in progress to be ready for human review first. When its direct message reports the push, record the new SHA; the PR has had its review round, so there is no new one. Tell the user the change is pushed and is theirs to validate: no agent reviews it. Have the steps stacked on top of it rebased before they continue.
 
 ## Reviewer agents
 
