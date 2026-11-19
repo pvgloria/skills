@@ -24,7 +24,7 @@ Before you start, for each changed piece, read its callers at the PR head and no
   its commits, comments or criteria.
 
 Out of this review: correctness on other threads (edge cases), crashes on large input (edge
-cases), safe query building (security), schema upgrades (migrations), library setup order, and
+cases), safe query building (security), schema upgrades, library setup order, and
 which layer owns UI state. Code that runs only in tests, debug builds or tooling is not a finding.
 
 ## Hot paths

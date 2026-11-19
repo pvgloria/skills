@@ -29,7 +29,7 @@ Before you start:
   intent filter and no `android:exported` is exported.
 
 Out of this review: input that is merely empty or malformed by a bug (edge cases), schema
-upgrades (migrations), timeouts and retries, logging conventions, and where in the architecture
+upgrades, timeouts and retries, logging conventions, and where in the architecture
 a check lives. Whether the check runs, server-side, before the data is touched, is in scope.
 
 ## Authentication and authorization

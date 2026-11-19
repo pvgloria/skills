@@ -19,7 +19,7 @@ exceptions caught at a boundary) and how its tests are set up (fakes, test dispa
 clock).
 
 Out of this review: hostile input (security), how long large inputs take (performance), data
-in an older stored format (migrations), and which error mechanism the project should use.
+in an older stored format, and which error mechanism the project should use.
 
 ## Inputs
 

@@ -149,7 +149,6 @@ Choose reviewers from the step's subject and the PR's changed files, without rea
     - TLS, certificate pinning or the network security config;
     - a newly exported Android component, a deep link that acts for the user, or a `WebView` with JavaScript enabled on content the app does not control.
   - `reviewer-performance`: per-frame, per-item, per-request, startup or unbounded-loop code; database queries; image or large-file processing; rendering work.
-  - `reviewer-data-migrations`: database schema or migrations; stored or cached serialized classes; preference or DataStore keys; written file or wire formats.
 - **Only when the user asks:** `reviewer-architecture`.
 
 ## Close out
