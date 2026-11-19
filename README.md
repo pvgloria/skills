@@ -175,7 +175,7 @@ cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md .claude/agents/
 Each reviewer is a Claude Code subagent that checks one area of a PR and never changes
 anything. Edge cases and acceptance run on every PR with code. If a PR has only documentation or
 images, only acceptance runs. Security and performance run only when the PR
-clearly touches their area, and architecture only when you ask for it.
+clearly touches their area.
 
 Every agent loads two skills: `read-only-pr-review`, which they all share, and its own
 `review-<area>`. Each agent's file sets the model and effort it runs with.
@@ -183,7 +183,6 @@ Every agent loads two skills: `read-only-pr-review`, which they all share, and i
 | Agent | Runs on | Area | Model / effort | Skills |
 |-------|---------|------|----------------|--------|
 | [`reviewer-acceptance`](skills/coo/agents/reviewer-acceptance.md) | Every PR | The PR does what the step asked, all of it and nothing more. | sonnet / high | `read-only-pr-review`, `review-acceptance` |
-| [`reviewer-architecture`](skills/coo/agents/reviewer-architecture.md) | When you ask | Architecture and the good practices of the project's stack. | sonnet / high | `read-only-pr-review`, `review-architecture` |
 | [`reviewer-edge-cases`](skills/coo/agents/reviewer-edge-cases.md) | Every PR with code | Edge cases: covered and not breaking. | sonnet / high | `read-only-pr-review`, `review-edge-cases` |
 | [`reviewer-security`](skills/coo/agents/reviewer-security.md) | When touched | Security: auth, secrets, untrusted input, network and TLS, sensitive data at rest, permissions. | sonnet / high | `read-only-pr-review`, `review-security` |
 | [`reviewer-performance`](skills/coo/agents/reviewer-performance.md) | When touched | Performance: hot paths, queries, large collections, rendering, startup. | sonnet / high | `read-only-pr-review`, `review-performance` |
@@ -195,7 +194,6 @@ Every agent loads two skills: `read-only-pr-review`, which they all share, and i
 | [`coo`](skills/coo/coo/SKILL.md) | Run a feature as a COO orchestrator — a few PR-sized steps, one review round each, reviewer agents gating the next step. |
 | [`read-only-pr-review`](skills/coo/read-only-pr-review/SKILL.md) | Review a PR without changing anything — get the diff, read files at the PR head, stay read-only, reply with a verdict and graded findings. Loaded by every reviewer agent. |
 | [`review-acceptance`](skills/coo/review-acceptance/SKILL.md) | Review a PR against its step — every acceptance criterion met, the goal delivered, nothing outside the scope. |
-| [`review-architecture`](skills/coo/review-architecture/SKILL.md) | Review a PR's architecture — layer boundaries, dependency direction, where logic and state live, justified abstractions. |
 | [`review-edge-cases`](skills/coo/review-edge-cases/SKILL.md) | Review a PR's edge cases — empty, null, boundary and large inputs, failures, cancellation, concurrency, and whether their tests assert the behaviour. |
 | [`review-performance`](skills/coo/review-performance/SKILL.md) | Review a PR's performance — work on hot paths, query count and shape, large collections, rendering and startup, and a measurement where a speed or memory claim needs one. |
 | [`review-security`](skills/coo/review-security/SKILL.md) | Review a PR's security — authentication and authorization on its entry points, secrets, untrusted input, network and TLS, sensitive data at rest, and permissions. |
