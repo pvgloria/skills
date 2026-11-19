@@ -97,8 +97,9 @@ npx skills list
 of one feature. It takes a PRD, ADR, document or prompt and builds it end to end without
 writing or reviewing code itself:
 
-1. **Plan** — agrees the problem, goal and constraints with you, splits the feature into
-   story-sized steps, and keeps the plan and its state in a feature file.
+1. **Plan** — agrees the problem, goal and constraints with you, splits the feature into a
+   few PR-sized steps that group related user stories, and keeps the plan and its state in a
+   feature file.
 2. **Delegate** — hands each step to its own Claude Code implementer session, which ends with
    a PR. Implementers run on Opus / medium, each on its own branch in the project's checkout,
    never in a git worktree.
@@ -109,9 +110,6 @@ writing or reviewing code itself:
    ready for human review and starts the next step, stacked on the previous one if it isn't
    merged yet. For each step it lists what you have to validate: the fixes made after the
    review, which no agent checked, every finding left unfixed and every nit.
-
-Along the way it keeps a usage log in the feature file, with what each implementer session and
-each review round cost, and sums it up per step when the feature is done.
 
 Everything it needs lives in the [`skills/coo/`](skills/coo/) bucket, which depends on no
 other bucket.
@@ -195,7 +193,7 @@ Every agent loads two skills: `read-only-pr-review`, which they all share, and i
 
 | Skill | Description |
 |-------|-------------|
-| [`coo`](skills/coo/coo/SKILL.md) | Run a feature as a COO orchestrator — story-sized steps, one PR and one review round each, reviewer agents gating the next step. |
+| [`coo`](skills/coo/coo/SKILL.md) | Run a feature as a COO orchestrator — a few PR-sized steps, one review round each, reviewer agents gating the next step. |
 | [`read-only-pr-review`](skills/coo/read-only-pr-review/SKILL.md) | Review a PR without changing anything — get the diff, re-review only what changed since your last review, stay read-only, reply with a verdict and graded findings. Loaded by every reviewer agent. |
 | [`review-acceptance`](skills/coo/review-acceptance/SKILL.md) | Review a PR against its step — every acceptance criterion met, the goal delivered, nothing outside the scope. |
 | [`review-architecture`](skills/coo/review-architecture/SKILL.md) | Review a PR's architecture — layer boundaries, dependency direction, where logic and state live, justified abstractions. |
