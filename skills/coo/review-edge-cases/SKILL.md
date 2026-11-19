@@ -5,230 +5,117 @@ description: "How to review the edge cases of a pull request: check how the code
 
 # Review: edge cases
 
-This review answers five questions about the PR, and only these:
+Check the code the diff adds or changes, and existing code it now passes new inputs into, for:
+inputs, failures, cancellation, concurrency, and the tests for those cases.
 
-1. Does the code the diff adds or changes behave correctly on empty, null, boundary and large
-   inputs?
-2. Does a failure leave a defined result and a consistent state?
-3. Does cancelled work stop, clean up and leave a consistent state?
-4. Does running concurrently, or being triggered twice, lose, duplicate or corrupt nothing?
-5. Do the tests for these cases assert the behaviour, rather than only run the code?
+A case is a finding only when you can name **the input or event that triggers it** and **what
+goes wrong**: a crash, hang, wrong result, stuck or inconsistent state, lost or duplicated data,
+a leak, or a failure that reads as success. Follow each value back to its source: a case the
+types or the callers rule out is not a finding. Non-nullable types rule out null, except for
+values from the network, disk, database, platform APIs, Java interop or casts.
 
-A case is a finding only when you can name two things: the input or event that triggers it, and
-what goes wrong when it arrives. What goes wrong is a crash, a hang, a wrong result, a stuck or
-inconsistent state, lost or duplicated data, a leak, or a failure that reads as success. "What if
-the list is empty?" with no consequence is not a finding. Neither is a case the code cannot
-reach: follow each value back to its source before reporting it.
+Before you start, find how the project reports failures (a `Result` type, error state,
+exceptions caught at a boundary) and how its tests are set up (fakes, test dispatcher, virtual
+clock).
 
-## 1. Set the baseline
+Out of this review: hostile input (security), how long large inputs take (performance), data
+in an older stored format (migrations), and which error mechanism the project should use.
 
-Before walking the cases, settle what each changed unit promises and how the project handles
-failures and tests.
+## Inputs
 
-- **The units.** List each function, handler, component, query, mapper or script the diff adds
-  or changes behaviour in. When the diff holds no executable code, apply the checks to any
-  procedure it defines, such as a CI job or written step-by-step instructions: what happens when
-  an input is missing or empty, and when a step fails. Prose that defines no procedure has no
-  edge cases.
-- **The contract of each unit.** From its signature, its doc-comment, the step goal and
-  acceptance criteria, and its callers at the PR head, work out which inputs it can receive and
-  what it should return or do for each. The type system rules some cases out: a non-nullable
-  Kotlin or Swift parameter cannot be null. A value from the network, the disk, a database, a
-  platform API, Java interop or a cast can be null or malformed whatever its declared type.
-- **The project's error mechanism.** Find how the project reports failures: a `Result` or sealed
-  error type, a safe-call wrapper, exceptions caught at a boundary, an error state in the UI. A
-  failure is handled when it reaches that mechanism. Which mechanism the project should use is
-  not part of this review.
-- **The project's tests.** Find where tests for each kind of changed code live and what they
-  use: the framework, fakes, a test dispatcher or a virtual clock.
+- **Empty:** empty collection or string, zero, a `Flow` that never emits, no body, no rows.
+  Watch `first()`, `[0]`, `max()`, `reduce`, `single()`, division by a count, and screens with
+  no "loaded, nothing to show" state.
+- **Null or missing:** absent field or key, failed lookup, unset optional. Watch `!!`, `!`,
+  `.get()`, and defaults that hide an absence the caller needed to know about.
+- **Boundaries:** zero, one, last index, first and last page, negatives, type min/max. Watch
+  `until` vs `..`, `<` vs `<=`, 32-bit overflow on millis, cents or bytes, time zones and DST,
+  month ends, emoji length, locale-dependent parsing.
+- **Unknown values:** a new enum value or status code. A `when`/`switch` `else` that treats it
+  as a known value and changes the result is a finding.
+- **Large:** thousands of items, long strings, deep structures, large files. Watch loading it
+  all into memory, deep recursion, and hard limits: Android's ~1 MB Binder limit on `Intent`,
+  `Bundle` and saved state, SQLite's bound-variable limit in `IN (...)`, request size limits,
+  API page size caps.
 
-Review what the diff adds or changes, and the existing code it passes new inputs into: a new
-caller that hands an empty list to an old function that fails on one is this diff's case. A
-broken case in code the diff does not touch or call is not a finding.
+## Failures
 
-## 2. Check inputs: empty, null, boundary, large
+For each operation that can fail (I/O, network, parsing, database write, platform call):
 
-For each input to a changed unit (parameters, data read from the network, disk or a database,
-user input, configuration, platform callbacks), walk these values and follow each through the
-code:
+- The caller gets an error it can act on, through the project's mechanism. Not a crash, and not
+  an empty result that reads as "no data".
+- No catch is wider than needed: a catch-all that drops the error, or traps programming errors,
+  hides bugs.
+- State stays consistent: multi-step writes complete or roll back, flags like `isLoading` are
+  reset on failure, resources close on every path (`use`, `finally`, `defer`).
+- Retries are bounded and only wrap operations safe to repeat.
+- One failed item in a batch does not silently drop the others.
 
-- **Empty.** An empty collection or string, a blank string, zero, a stream or `Flow` that
-  completes without emitting, a response with no body, a query with no rows. Look for calls that
-  fail on empty (`first()`, `[0]`, `max()`, `reduce`, `single()`), a division by a count, and a
-  screen that has no state for "loaded, nothing to show" and stays on its spinner.
-- **Null and missing.** An absent field or map key, a lookup that finds nothing, an optional
-  that was never set, a null from a platform or interop call. Look for force-unwraps (`!!`, `!`,
-  `.get()` on an empty optional) and for defaults that hide an absence the caller needed to know
-  about. Where data comes from the network or from storage, walk each null and missing field
-  through the mapping into the project's own types.
-- **Boundaries.** Zero, one, the last index, the first and last page, negative values where only
-  positive ones were assumed, and the minimum and maximum of the type. Off-by-one errors hide in
-  ranges (`until` against `..`, `<` against `<=`) and in pagination. Sums of milliseconds, cents
-  or byte counts can overflow a 32-bit integer. Dates break at time zones, daylight-saving
-  changes, month ends, leap days and the epoch. Strings break on emoji and combining characters,
-  where the length in code units is not the number of characters, and on locale-dependent
-  formatting and parsing, such as a decimal comma.
-- **Unknown values.** An enum value or response type the server adds later, an unexpected status
-  code. Check what the mapping does with it: crash, drop the whole response, or fall back. A
-  `when` or `switch` whose `else` branch quietly treats an unknown value as a known one is a
-  finding when that changes the result.
-- **Large.** Inputs far larger than the test data: thousands of items, a long string, a deep
-  structure, a large file. Check whether the code breaks: running out of memory by loading
-  everything at once, overflowing the stack through recursion, or exceeding a size limit. Known
-  limits include the roughly 1 MB Binder transaction limit on Android, which data passed in an
-  `Intent`, a `Bundle` or saved instance state must fit under; the SQLite limit on bound
-  variables in an `IN (...)` list; a request body limit; and a page size the API caps. How long a
-  large input takes, or how much memory it uses when it works, is not part of this check.
+## Cancellation
 
-These are inputs that are unexpected but not hostile: empty, null, out of range, too large, or
-malformed by a bug. Input crafted to attack the code, such as injection, path traversal or a size
-chosen to exhaust memory, is not part of this check. When one missing check fails both ways,
-report what breaks for ordinary input. Data written in an older format by an earlier version of
-the app, and how it is upgraded, is not part of this check either; a value that is empty or
-missing in the current format is.
+For each piece of async work the diff starts or changes:
 
-## 3. Check error paths
+- **The signal propagates.** `catch (e: Exception)`, `catch (e: Throwable)` and `runCatching`
+  around a suspend call also catch `CancellationException`: rethrow it. Same trap elsewhere: a
+  JS `AbortError` treated as a failure, Java `InterruptedException` without restoring the flag,
+  a Go loop that never reads `ctx.Done()`.
+- **The work stops.** Long loops check `ensureActive()`/`yield()` or the stack's equivalent.
+- **Cleanup runs.** Release in `finally`; suspending cleanup needs
+  `withContext(NonCancellable)`; callback-based flows unregister in `awaitClose`.
+- **State stays consistent** if cancelled between two writes.
+- **An older request cannot overwrite a newer one.** Look for `collectLatest`, `flatMapLatest`,
+  `switchMap`, an `AbortController` or a request id.
+- **Waits are bounded.** `withTimeout` throws a `CancellationException` that silently ends the
+  coroutine; `withTimeoutOrNull` or catching it turns it into a handled failure.
 
-For each operation in the changed code that can fail (I/O, network, parsing, a database write, a
-platform call, a call that throws or returns an error), check that:
+## Concurrency
 
-- **The failure reaches a defined result.** The caller gets an error it can act on, through the
-  project's mechanism: an error state, a typed error, a retry. Not a crash, and not an empty
-  result that reads as "no data".
-- **No catch is wider than it needs to be.** A catch-all that drops the error with no result, no
-  rethrow and no log hides failures. A catch that also traps programming errors turns a bug into
-  a normal-looking state.
-- **State stays consistent.** A multi-step write either completes or rolls back; a flag set
-  before the call (`isLoading`, `isSaving`) is reset on failure too; a resource opened is closed
-  on every path (`use`, `try`-with-resources, `defer`, `finally`).
-- **Retries are bounded** and wrap only operations that are safe to repeat.
-- **Batches fail predictably.** When one item of a batch fails, the others are not silently
-  dropped, or the contract says what happens to them.
+When the code can run more than once at a time, or shares state with code that can:
 
-## 4. Check cancellation
+- **Shared mutable state** needs a lock, `Mutex`, atomic or single-thread confinement.
+  Check-then-act and `_state.value = _state.value.copy(...)` (instead of `_state.update { }`)
+  lose updates.
+- **Repeated triggers:** double tap, overlapping retry, lifecycle event firing again. Look for a
+  guard: disabled while running, single-flight, idempotency key.
+- **Ordering:** results assumed to arrive in request order; events emitted before anyone
+  collects (`SharedFlow` with `replay = 0`); one-off events held in a `StateFlow`.
+- **Thread confinement:** UI state written off the main thread; non-thread-safe objects shared
+  (database handle, date formatter, plain hash map).
+- **Deadlocks:** locks taken in opposite orders; a blocking wait (`runBlocking`, `.get()`,
+  `.join()`) on the thread the awaited work needs.
 
-Async work gets cancelled: its scope ends when a screen closes or a request is aborted, a timeout
-fires, or a newer request replaces it. For each piece of async work the diff starts or changes:
+## Tests
 
-- **Cancellation propagates.** A catch-all around an async call must not swallow the
-  cancellation signal. In Kotlin coroutines, `catch (e: Exception)`, `catch (e: Throwable)` and
-  `runCatching` around a suspend call also catch `CancellationException`: rethrow it, or use a
-  wrapper that does. Other stacks have the same trap: an `AbortError` caught as an ordinary
-  failure in JavaScript, an `InterruptedException` caught in Java without restoring the
-  interrupt flag, a Go loop that never reads `ctx.Done()`.
-- **Cancelled work stops.** A loop or long computation checks for cancellation (`ensureActive()`
-  or `yield()` in coroutines, a cancellation token or `ctx.Err()` elsewhere), or it keeps running
-  and writing after its owner is gone.
-- **Cleanup runs on cancellation.** Resources and in-progress flags are released in `finally`.
-  In coroutines, cleanup that suspends must run in `withContext(NonCancellable)`, or it is
-  cancelled too. A callback or listener wrapped as a suspend function or `Flow` is unregistered
-  on cancellation (`awaitClose`, `invokeOnCancellation`).
-- **Cancellation midway leaves a consistent state.** Work cancelled between two writes leaves
-  either both or neither. Closing the screen during a save does not stop the save halfway.
-- **A superseded request cannot overwrite a newer one.** When each new query, refresh or input
-  launches its own request, an older response can arrive last and replace the newer result. Look
-  for the previous request being cancelled or its result ignored: `collectLatest`,
-  `flatMapLatest`, `switchMap`, an `AbortController`, a request id.
-- **Waits are bounded and timeouts handled.** A network call or wait with no timeout can hang.
-  In coroutines, `withTimeout` throws `TimeoutCancellationException`, a `CancellationException`:
-  when nothing catches it, the coroutine ends as if cancelled, with no crash and no error state.
-  `withTimeoutOrNull`, or catching it where the timeout is handled, makes it a failure the code
-  can act on.
+For each case the code handles, when a test makes sense, the test must drive the case (empty
+input, fake error, cancelled job, concurrent calls) and assert the outcome. A test that only runs
+the code, only asserts nothing was thrown, or only verifies a mock was called does not count.
+Async tests must control time (test dispatcher, virtual time, fake clock), not real `sleep` or
+`delay`. One test per distinct behaviour is enough.
 
-Which component owns a piece of work, and whether that owner lives as long as the work must, is
-not part of this check. What happens to the work when it is cancelled is.
+## Severity
 
-## 5. Check concurrency
-
-When the changed code can run more than once at the same time, or shares state with code that
-can, check:
-
-- **Shared mutable state.** A field, cache or collection that several threads or coroutines read
-  and write needs a lock, a `Mutex`, an atomic or confinement to one thread or dispatcher.
-  Check-then-act (`if (cache[key] == null) cache[key] = load()`) and read-modify-write
-  (`_state.value = _state.value.copy(...)` instead of `_state.update { }`) lose updates even
-  when each step looks safe.
-- **Repeated triggers.** A double tap, a retry that overlaps the first attempt, a lifecycle event
-  or subscription that fires again: the second run duplicates the work, such as a second order,
-  or interleaves with the first. Look for a guard: the action disabled while it runs, a
-  single-flight or dedupe, an idempotency key.
-- **Ordering.** Code that assumes async results arrive in the order they were requested. Events
-  emitted before anyone collects them: a hot stream without replay, such as a `SharedFlow` with
-  `replay = 0`, drops them. One-off events held as state: a `StateFlow` replays the last one to a
-  new collector and drops a value equal to the current one.
-- **Thread confinement.** UI state written off the main thread; an object that is not
-  thread-safe, such as a thread-confined database handle, a date formatter or a plain hash map,
-  shared across threads.
-- **Deadlocks.** Two locks taken in opposite orders in two places; a blocking wait
-  (`runBlocking`, `.get()`, `.join()` on a future) on the thread or dispatcher the awaited work
-  needs.
-
-## 6. Check the tests for each case
-
-For each case from sections 2 to 5 that the changed code handles, first judge whether a test
-makes sense for it; a one-line guard may not need one. When it does, find the test at the PR
-head that covers it. A test covers a case when it:
-
-- **drives the case:** it passes the empty list, makes the fake return the error, cancels the
-  job, or runs the two calls together or in the order that breaks;
-- **asserts the behaviour** the contract promises for that case: the returned value, the emitted
-  state, the error type, the state after cleanup, or that nothing was written. A test that only
-  runs the code, asserts only that nothing was thrown, or checks that a mock was called without
-  checking the outcome does not cover the case;
-- **controls time and scheduling** when the case is async or concurrent: a test dispatcher,
-  virtual time, a fake clock, a latch or barrier. A test that relies on real `sleep` or `delay`,
-  or on how threads happen to be scheduled, passes or fails by timing and proves nothing.
-
-Look for one test per distinct behaviour, not one per value: when empty and null take the same
-branch to the same result, one test covers both.
-
-Tests for the main behaviour the step asks for are not part of this check; tests for the edge
-cases around it are. How the project names and lays out its tests is not part of this check
-either.
-
-## 7. Grade each finding
-
-Grade a case the code does not handle by what happens when it occurs in use, whether or not a
-test exists for it. A missing or weak test for a case is a finding of its own, graded separately.
+Grade a case by what happens in use, whether or not a test exists; a missing test is a separate
+finding.
 
 | Situation | Severity |
 |-----------|----------|
-| A reachable input or event crashes, hangs or deadlocks the code | `blocker` |
-| A case loses, corrupts or duplicates data that is stored or sent: a half-done write, a lost update, a double submit | `blocker` |
-| Cancellation is swallowed or ignored, so cancelled work goes on running or writing | `blocker` |
-| Shared mutable state is read and written concurrently with no synchronization | `blocker` |
-| A reachable case gives a wrong result or a stuck state the user can recover from: an empty list shown as loading, an off-by-one at a page boundary, a stale response replacing a newer one, a flag never reset after a failure | `should-fix` |
-| A failure is dropped with no result, error or log, so the caller cannot tell it from success or from "no data" | `should-fix` |
-| A cancellation is reported as a failure: an error logged, shown or retried when the caller only went away | `should-fix` |
-| A resource or registration is not released on an error or cancellation path | `should-fix` |
-| A case no current caller can reach but the public signature allows, such as an input every caller already guards | `nit` |
-| A case the code handles, where a test makes sense, and no test drives it and asserts the outcome | `nit` |
-| A test for a case passes or fails by timing | `nit` |
+| A reachable input or event crashes, hangs or deadlocks | `blocker` |
+| Stored or sent data is lost, corrupted or duplicated (half-done write, lost update, double submit) | `blocker` |
+| Cancellation swallowed, so cancelled work keeps running or writing | `blocker` |
+| Shared mutable state accessed concurrently with no synchronization | `blocker` |
+| Wrong result or recoverable stuck state (empty shown as loading, page off-by-one, stale response wins, flag never reset) | `should-fix` |
+| A failure dropped with no result, error or log | `should-fix` |
+| A cancellation reported as a failure (logged, shown or retried) | `should-fix` |
+| A resource or registration not released on an error or cancellation path | `should-fix` |
+| A case no current caller reaches but the public signature allows | `nit` |
+| A handled case with no test that drives it and asserts the outcome | `nit` |
+| A test that passes or fails by timing | `nit` |
 
-A case the types or the callers rule out is not a finding at any severity.
+## Findings
 
-## 8. Write the findings
+Name the case concretely and what goes wrong, at the line that breaks or where handling is
+missing:
 
-Each finding names the case as concretely as you can ("an empty `orders`", "a second tap while
-the first save runs", "the scope cancelled during `upload()`") and says what goes wrong. Point
-the location at the line that breaks or where the handling is missing: the `first()`, the catch,
-the `launch`, the unguarded write. For a test finding, point at the test, or at the line of code
-whose case has no test.
-
-From check to finding:
-
-- `val latest = orders.maxBy { it.date }`, where `orders` comes from the API, which returns an
-  empty list for a new account.
-  → `[blocker] app/src/main/java/orders/OrderSummary.kt:27 - maxBy throws NoSuchElementException for a new account, whose order list is empty`
-- `average = sum(durations) / len(durations)` in a daily report.
-  → `[blocker] reports/summary.py:18 - divides by len(durations), which raises ZeroDivisionError for a day with no sessions`
-- A `while (true)` polling loop wraps `delay(interval)` and `poll()` in
-  `try { } catch (e: Exception) { log(e) }`.
-  → `[blocker] app/src/main/java/sync/SyncPoller.kt:33 - the catch also traps CancellationException, so when the scope is cancelled the loop never exits and spins logging errors`
-- `fun pay() = viewModelScope.launch { repository.placeOrder(cart) }`, and the button stays
-  enabled while the call runs.
-  → `[blocker] app/src/main/java/checkout/CheckoutViewModel.kt:64 - a second tap on Pay while placeOrder runs places the order twice`
-- Each change of the query calls `launch { _results.value = repository.search(query) }`.
-  → `[should-fix] app/src/main/java/search/SearchViewModel.kt:52 - a slow response for an older query can arrive after the newer one and replace its results`
-- `@Test fun emptyCart() { viewModel.load(emptyList()) }`, with no assertion.
-  → `[nit] app/src/test/java/cart/CartViewModelTest.kt:40 - emptyCart loads an empty list but asserts nothing about the resulting state`
+- `[blocker] app/src/main/java/orders/OrderSummary.kt:27 - maxBy throws NoSuchElementException for a new account, whose order list is empty`
+- `[blocker] app/src/main/java/sync/SyncPoller.kt:33 - the catch also traps CancellationException, so the loop never exits when the scope is cancelled`
+- `[should-fix] app/src/main/java/search/SearchViewModel.kt:52 - a slow response for an older query can arrive last and replace the newer results`
