@@ -77,7 +77,9 @@ Start the implementer session with this brief, and record its session id:
 ## Out of scope
 
 ## Design source
-<Figma link, or "n/a">. Match it exactly. Where it is unclear, ask the COO instead of approximating.
+<Figma link to this step's frames, or "n/a" for a step without UI>
+Build the UI to match the design exactly: layout, spacing, sizes, colours, typography, icons and every state shown.
+Where the design is unclear or the design system has nothing that matches, ask the COO instead of approximating.
 
 ## Branch
 Create a new branch `<branch>` for this step, based on `<base>`, in the repository folder this session started in:
