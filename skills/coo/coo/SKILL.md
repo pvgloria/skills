@@ -10,7 +10,7 @@ This session is the **COO** of one feature. It plans, delegates, launches review
 ## Implementers
 
 - Each step gets its own Claude Code session (the harness's start-session tool), on `opus` / `medium`, unless the user asks otherwise. Never a subagent from the Agent tool. If the harness cannot start a session, stop and tell the user.
-- No worktree, ever: start the session with `use_worktree: false` or the harness's equivalent. The implementer works on a branch in the project's checkout.
+- No worktree, ever: start the session with `use_worktree: false` or the harness's equivalent. The implementer creates a new branch for its step in the project's existing repository folder, based on the previous step's branch, or on `main` once that step is merged.
 - Only one implementer works at a time.
 - Every follow-up for a step goes to that step's session, by its id. If it can no longer be reached, start a new one with the original brief, the PR link and what it has to do.
 
@@ -80,8 +80,9 @@ Start the implementer session with this brief, and record its session id:
 <Figma link, or "n/a">. Match it exactly. Where it is unclear, ask the COO instead of approximating.
 
 ## Branch
-Work in this checkout. Never create or enter a git worktree.
+Create a new branch `<branch>` for this step, based on `<base>`, in the repository folder this session started in:
 `git fetch origin && git checkout -b <branch> origin/<base>`
+Do not clone the repository again, and never create or enter a git worktree.
 Leave the user's uncommitted and untracked files alone and out of your commits.
 
 ## Reporting
