@@ -1,6 +1,6 @@
 ---
 name: reviewer-security
-description: Read-only reviewer that checks whether a pull request opens a security hole - authentication and authorization on the entry points it adds, secrets in code, config, logs and errors, validation of untrusted input, network and TLS, sensitive data at rest, and the permissions it requests and grants. Give it the PR link, the step goal and acceptance criteria, the review round, and on a re-review the commit it last reviewed and its previous findings; it replies with a verdict and findings. Not for a code review a person asks for.
+description: Read-only reviewer that checks whether a pull request opens a security hole - authentication and authorization on the entry points it adds, secrets in code, config, logs and errors, validation of untrusted input, network and TLS, sensitive data at rest, and the permissions it requests and grants. Give it the PR link, and the step goal and acceptance criteria; it replies with a verdict and findings. Not for a code review a person asks for.
 disallowedTools: Edit, Write, NotebookEdit, Agent
 model: sonnet
 effort: high

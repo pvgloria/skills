@@ -194,7 +194,7 @@ Every agent loads two skills: `read-only-pr-review`, which they all share, and i
 | Skill | Description |
 |-------|-------------|
 | [`coo`](skills/coo/coo/SKILL.md) | Run a feature as a COO orchestrator — a few PR-sized steps, one review round each, reviewer agents gating the next step. |
-| [`read-only-pr-review`](skills/coo/read-only-pr-review/SKILL.md) | Review a PR without changing anything — get the diff, re-review only what changed since your last review, stay read-only, reply with a verdict and graded findings. Loaded by every reviewer agent. |
+| [`read-only-pr-review`](skills/coo/read-only-pr-review/SKILL.md) | Review a PR without changing anything — get the diff, read files at the PR head, stay read-only, reply with a verdict and graded findings. Loaded by every reviewer agent. |
 | [`review-acceptance`](skills/coo/review-acceptance/SKILL.md) | Review a PR against its step — every acceptance criterion met, the goal delivered, nothing outside the scope. |
 | [`review-architecture`](skills/coo/review-architecture/SKILL.md) | Review a PR's architecture — layer boundaries, dependency direction, where logic and state live, justified abstractions. |
 | [`review-data-migrations`](skills/coo/review-data-migrations/SKILL.md) | Review a PR's data migrations — schema and persisted-format changes, the upgrade path from every shipped version, compatibility in both directions, rollback, and migration tests. |

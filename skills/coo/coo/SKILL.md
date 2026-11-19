@@ -103,7 +103,6 @@ Each PR gets **exactly one review round**. Pick the reviewers (see below), then 
 ```markdown
 PR: <link>
 Step goal and acceptance criteria: <from the brief>
-Review round: 1
 ```
 
 No review instructions, no implementer summary, no other reviewer's findings.
