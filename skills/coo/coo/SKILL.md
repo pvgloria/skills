@@ -9,7 +9,7 @@ This session is the **Chief Operations Officer (COO)** for one feature. The COO 
 
 Why the separation matters: the COO's context is the only place where the whole feature lives. Filling it with diffs and implementation detail makes it lose the plan. Implementers and reviewers get a narrow brief and a fresh context, which is also what keeps reviews independent of the work they are judging.
 
-Every implementer, including a re-launched one, runs in its own Claude Code session, started with whatever the harness offers for that (for example its start-session tool), and every follow-up goes to that same session by its id. Implementers work on a branch in the project's own checkout, never in a worktree (for example the start-session tool with `use_worktree: false`), and never in parallel: only one implementer session works at any time, so two sessions never switch branches in the same checkout. The brief tells it to leave the user's uncommitted and untracked files alone and out of its commits. Never use a subagent from the Agent tool as an implementer: it ends with the COO's session, so review fixes and changes from human review would have no implementer left with the context. If the harness offers no way to start a persistent session, stop and tell the user instead of falling back to a subagent.
+Every implementer, including a re-launched one, runs in its own Claude Code session, started with whatever the harness offers for that (for example its start-session tool), and every follow-up goes to that same session by its id. Implementers work on a branch in the project's own checkout, created with `git checkout -b` from the step's base branch. Never use a git worktree: start the session without one (for example the start-session tool with `use_worktree: false`), and the brief forbids the implementer to create or enter one. Implementers never run in parallel: only one implementer session works at any time, so two sessions never switch branches in the same checkout. The brief tells it to leave the user's uncommitted and untracked files alone and out of its commits. Never use a subagent from the Agent tool as an implementer: it ends with the COO's session, so review fixes and changes from human review would have no implementer left with the context. If the harness offers no way to start a persistent session, stop and tell the user instead of falling back to a subagent.
 
 Reviewers are different on purpose: each is a read-only agent launched in a fresh context, which is what keeps it independent. A read-only exploration for planning can be a subagent too.
 
@@ -58,12 +58,7 @@ Good steps:
 - Leave the code working when applied in order.
 - Are small enough for one PR a reviewer can hold in their head. If a step needs "and" twice in its title, split it.
 
-Give each step the model and effort its implementer session runs with:
-
-- `opus` / `medium` by default.
-- `opus` / `high` for a step that sets a shape later steps build on, or that touches concurrency, stored data or security-sensitive code.
-
-The choice holds for the step's whole life, re-launched implementers included, unless the user changes it.
+Every implementer session runs on `opus` / `medium`, re-launched implementers included, unless the user asks otherwise.
 
 Write the plan to a feature file (default `.claude/features/<feature-slug>.md`, or wherever the project keeps such documents) so the state survives a lost session:
 
@@ -77,9 +72,9 @@ Source: <link or path to the PRD / ADR / doc, or "prompt">
 ## Constraints / out of scope
 
 ## Steps
-| # | Step | Status | Implementer | Session | PR | Head SHA | Base branch | Reviewers |
-|---|------|--------|-------------|---------|----|----------|-------------|-----------|
-| 1 | ...  | pending / in progress / in review / changes requested / ready for human review / merged | opus / medium | | | | | |
+| # | Step | Status | Session | PR | Head SHA | Branch | Base branch | Reviewers |
+|---|------|--------|---------|----|----------|--------|-------------|-----------|
+| 1 | ...  | pending / in progress / in review / changes requested / ready for human review / merged | | | | | | |
 
 ## Step details
 ### Step 1 - <title>
@@ -87,7 +82,6 @@ Source: <link or path to the PRD / ADR / doc, or "prompt">
 - Acceptance criteria:
 - Out of scope:
 - Design source: <Figma link to this step's frames, or "n/a">
-- Implementer: <model> / <effort> - <why>
 
 ## Decisions log
 
@@ -110,7 +104,7 @@ Source: <link or path to the PRD / ADR / doc, or "prompt">
 - Nit: <file>:<line> - <problem>
 ```
 
-Show the plan to the user, with each step's implementer model and effort, and get agreement before launching anything. Update the file at every state change.
+Show the plan to the user and get agreement before launching anything. Update the file at every state change.
 
 ## Phase 3 - Execute one step at a time
 
@@ -122,7 +116,7 @@ For each step:
 
 ### 3.1 Delegate
 
-Launch one implementation session with the step's model and effort, set through the harness's options for starting it (for example its start-session tool's `model` and `effort`), and a self-contained brief. Record its session id in the feature file. The implementer knows nothing about this conversation, so the brief must carry everything:
+Launch one implementation session on `opus` / `medium`, set through the harness's options for starting it (for example its start-session tool's `model` and `effort`), with no worktree, and a self-contained brief. Record its session id in the feature file. The implementer knows nothing about this conversation, so the brief must carry everything:
 
 ```markdown
 # Step <n> of <total>: <title>
@@ -144,6 +138,11 @@ Where the design is unclear or the design system has nothing that matches, ask t
 ## Your role
 You remain the implementer of this step for its whole life: the review findings and any changes asked in human review come back to this session.
 
+## Branch
+Work in this checkout. Never create or enter a git worktree.
+Start with `git fetch origin` and `git checkout -b <branch> origin/<base branch>`.
+Leave the user's uncommitted and untracked files alone and out of your commits.
+
 ## Reporting to the COO
 COO session id: <this session's id>
 Every time you open the PR or push to it, including review fixes and changes from human review, send a message to that session id with SendMessage, or whatever tool the harness offers for messaging another session. Its first line is:
@@ -151,7 +150,7 @@ Every time you open the PR or push to it, including review fixes and changes fro
 Your end-of-turn reply still goes out, but it is not the signal the COO waits for.
 
 ## Definition of done
-- Branch created from <base branch>.
+- Branch `<branch>` created from <base branch> in this checkout, with no worktree.
 - Implementation and tests complete, checks passing locally.
 - A pull request is open against <base branch>.
 - COO messaged directly with the PR link and SHA.
@@ -204,7 +203,7 @@ Then send a message to COO session <this session's id> with SendMessage, as in y
 Below it, list every finding you did not fix, verbatim, each with your reason, or write `Not fixed: none`.
 ```
 
-Send the report to **the same session that implemented the step**, by its id, since it has the context to fix things quickly. If that session can no longer be reached, launch a new session (never a subagent) with the step's model and effort, the original brief, the PR link and the report, and record its id.
+Send the report to **the same session that implemented the step**, by its id, since it has the context to fix things quickly. If that session can no longer be reached, launch a new session (never a subagent) on `opus` / `medium`, with no worktree, the original brief, the PR link and the report, and record its id.
 
 When the implementer's message arrives, record the new SHA, fill in the round's "Not fixed" count in the review log, and complete the step's entry in "Follow-ups for human review": every finding of the report it fixed, as fixed after review, and every one it did not fix, with its reason. No agent reviews the fixes, so they are what the user has to validate. Do not launch another review round: the step is ready for human review (see 3.5).
 
@@ -276,7 +275,7 @@ If a reviewer agent that should run does not exist in the current environment, d
 
 ## Usage log
 
-The usage log records what the feature used, so the user can see where the tokens go and compare implementer models. Each row holds what one session used between two reads.
+The usage log records what the feature used, so the user can see where the tokens go. Each row holds what one session used between two reads.
 
 Read a session's usage from what the harness reports for it, for example the `usage` the get-session tool returns: the cost in USD and the input, cache-read, cache-write and output tokens. That usage is cumulative and includes the session's subagents, but it counts a turn only once the turn has ended. A read made during a turn therefore leaves out that turn, and whatever a subagent used since the session's previous turn ended. A row holds the difference from the previous read of the same session; a session's first row holds all its usage so far.
 
@@ -293,8 +292,7 @@ When the last step is ready for human review, give the user a short wrap-up: wha
 The last round's reviewers enter this session's usage only after the current turn ends, so sum up the usage log in a later turn: schedule a message to this session a minute out if the harness offers a way (for example a send-later tool), or else do it at the user's next message, and say so in the wrap-up. In that turn, read this session and every implementer session a last time, add their rows, and give the user:
 
 - The total cost, split into planning, implementers and review rounds.
-- For each step: its implementer's model and effort, and the cost of its implementer and of its review round.
-- For each implementer model: the average cost per step, and the average number of blocker and should-fix findings its steps got.
+- For each step: the cost of its implementer and of its review round, and how many blocker and should-fix findings it got.
 
 ## Keeping the user informed
 

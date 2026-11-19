@@ -100,9 +100,8 @@ writing or reviewing code itself:
 1. **Plan** — agrees the problem, goal and constraints with you, splits the feature into
    story-sized steps, and keeps the plan and its state in a feature file.
 2. **Delegate** — hands each step to its own Claude Code implementer session, which ends with
-   a PR. The plan gives each step its implementer's model and effort: Opus / medium by default,
-   Opus / high for steps that set a shape later steps build on or touch concurrency, stored data
-   or security.
+   a PR. Implementers run on Opus / medium, each on its own branch in the project's checkout,
+   never in a git worktree.
 3. **Review** — runs one review round per PR: launches the reviewer agents in parallel, waits
    silently for all of them, and sends their blockers and should-fix findings to the same
    implementer once. There is no second round.
@@ -112,8 +111,7 @@ writing or reviewing code itself:
    review, which no agent checked, every finding left unfixed and every nit.
 
 Along the way it keeps a usage log in the feature file, with what each implementer session and
-each review round cost, and sums it up per step and per implementer model when the feature is
-done.
+each review round cost, and sums it up per step when the feature is done.
 
 Everything it needs lives in the [`skills/coo/`](skills/coo/) bucket, which depends on no
 other bucket.
@@ -186,11 +184,11 @@ Every agent loads two skills: `read-only-pr-review`, which they all share, and i
 
 | Agent | Runs on | Area | Model / effort | Skills |
 |-------|---------|------|----------------|--------|
-| [`reviewer-acceptance`](skills/coo/agents/reviewer-acceptance.md) | Every PR | The PR does what the step asked, all of it and nothing more. | sonnet / medium | `read-only-pr-review`, `review-acceptance` |
-| [`reviewer-architecture`](skills/coo/agents/reviewer-architecture.md) | When you ask | Architecture and the good practices of the project's stack. | sonnet / medium | `read-only-pr-review`, `review-architecture` |
-| [`reviewer-edge-cases`](skills/coo/agents/reviewer-edge-cases.md) | Every PR with code | Edge cases: covered and not breaking. | sonnet / medium | `read-only-pr-review`, `review-edge-cases` |
+| [`reviewer-acceptance`](skills/coo/agents/reviewer-acceptance.md) | Every PR | The PR does what the step asked, all of it and nothing more. | sonnet / high | `read-only-pr-review`, `review-acceptance` |
+| [`reviewer-architecture`](skills/coo/agents/reviewer-architecture.md) | When you ask | Architecture and the good practices of the project's stack. | sonnet / high | `read-only-pr-review`, `review-architecture` |
+| [`reviewer-edge-cases`](skills/coo/agents/reviewer-edge-cases.md) | Every PR with code | Edge cases: covered and not breaking. | sonnet / high | `read-only-pr-review`, `review-edge-cases` |
 | [`reviewer-security`](skills/coo/agents/reviewer-security.md) | When touched | Security: auth, secrets, untrusted input, network and TLS, sensitive data at rest, permissions. | sonnet / high | `read-only-pr-review`, `review-security` |
-| [`reviewer-performance`](skills/coo/agents/reviewer-performance.md) | When touched | Performance: hot paths, queries, large collections, rendering, startup. | sonnet / medium | `read-only-pr-review`, `review-performance` |
+| [`reviewer-performance`](skills/coo/agents/reviewer-performance.md) | When touched | Performance: hot paths, queries, large collections, rendering, startup. | sonnet / high | `read-only-pr-review`, `review-performance` |
 | [`reviewer-data-migrations`](skills/coo/agents/reviewer-data-migrations.md) | When touched | Data migrations: schema and persisted-format changes, upgrade from every shipped version, compatibility in both directions, rollback. | sonnet / high | `read-only-pr-review`, `review-data-migrations` |
 
 ### COO skills
