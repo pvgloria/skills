@@ -142,7 +142,12 @@ Choose reviewers from the step's subject and the PR's changed files, without rea
 - **Every PR:** `reviewer-edge-cases` and `reviewer-acceptance`.
 - **PR with only docs or binary assets** (Markdown, text, images, fonts, media): only `reviewer-acceptance`. Anything else, however small, gets the full set.
 - **Only when the PR clearly touches a trigger you can name:**
-  - `reviewer-security`: auth, sessions, tokens, secrets; untrusted input reaching a query, command, path, URL, parser or web view; network clients or TLS; sensitive data at rest; permissions, exported components.
+  - `reviewer-security`, only for one of these, or when the user asks:
+    - sign-in, sign-out, or how sessions and tokens are issued, stored or refreshed;
+    - authorization checks on a server endpoint;
+    - encryption, keys, or secrets the code handles;
+    - TLS, certificate pinning or the network security config;
+    - a newly exported Android component, a deep link that acts for the user, or a `WebView` with JavaScript enabled on content the app does not control.
   - `reviewer-performance`: per-frame, per-item, per-request, startup or unbounded-loop code; database queries; image or large-file processing; rendering work.
   - `reviewer-data-migrations`: database schema or migrations; stored or cached serialized classes; preference or DataStore keys; written file or wire formats.
 - **Only when the user asks:** `reviewer-architecture`.
