@@ -1,6 +1,6 @@
 ---
 name: "coo"
-description: "Run a feature or idea as a COO orchestrator: take a PRD, ADR, doc or prompt, agree a goal and a done-when check, split it into a few PR-sized tasks, hand each to a builder agent that ends in a PR, run one round of checks by the verifier and reviewer agents, send the failures to the builder once, and advance. Use when the user says \"coo\", \"iniciar feature\", \"arrancar feature\", \"start a feature\", or hands over a PRD/ADR/idea to be built end to end."
+description: "Run a feature or idea as a COO orchestrator: take a PRD, ADR, doc or prompt, agree a goal and a done-when check, split it into a few PR-sized tasks, hand each to a builder agent that ends in a PR, run one round of checks by the verifier and reviewer agents, send the failures to the builder once, and advance. Use when the user says \"coo\", or hands over a PRD/ADR/idea to be built end to end."
 ---
 
 # COO
