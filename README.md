@@ -15,50 +15,19 @@ what you install: point the CLI at one and you get its skills and nothing else.
 
 ## Install
 
-You need [Node.js](https://nodejs.org) (for `npx`) and git.
+You need [Node.js](https://nodejs.org) and git. The commands are the same in the Terminal and in
+PowerShell.
 
-To install a bucket globally, so every project on your computer can use it:
+For every project on your computer (run it anywhere):
 
 ```bash
 npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/engineering -g -s '*' --agent claude-code
 ```
 
-Replace `engineering` with any bucket from the table above. For the `coo` bucket, follow
-[Install the COO](#install-the-coo) instead: it also needs agents that this command does not
-install.
+For one project only, run it from the project's root folder without `-g`. Replace `engineering`
+with any bucket from the table. For `coo`, use [Install the COO](#install-the-coo) instead.
 
-What the flags do:
-
-- `-g` installs globally, into `~/.claude/skills/`. Leave it out to install into the current
-  project only, in its `.claude/skills/`.
-- `-s '*'` installs every skill in the bucket. `-s debug -s refactor` installs only those two.
-- `--agent claude-code` installs for Claude Code only, not for other AI tools.
-- `-y` skips the questions. Without it, the CLI asks where to install, for which tools, which
-  skills, and whether to copy the files or link to them. With these flags, it copies them.
-
-To install every bucket at once, `personal` included, leave out the bucket path:
-`npx skills add pvgloria/skills -g`.
-
-### Update
-
-To update every skill the CLI installed, including ones from other repos, run this for global
-skills:
-
-```bash
-npx skills update -g
-```
-
-And this from a project's root folder for that project's skills:
-
-```bash
-npx skills update -p
-```
-
-To see what is installed:
-
-```bash
-npx skills list
-```
+To update, run `npx skills update -g`, or `npx skills update -p` from a project's root folder.
 
 ## Engineering skills
 
@@ -94,108 +63,100 @@ npx skills list
 ## COO
 
 [`coo`](skills/coo/coo/SKILL.md) turns a Claude Code session into the orchestrator of one
-feature. It plans, delegates and decides, and leaves searching, building and checking to a team
-of subagents:
+feature. It plans and decides; subagents search, build and check:
 
-1. **Plan** — agrees a goal, a "done when" check and what to ask you before, sends scouts to map
-   the code, and splits the feature into a few PR-sized tasks kept in a feature file.
-2. **Build** — hands each task to a builder, which ends with a PR. One builder works at a time,
-   each on its own branch in the project's checkout, never in a git worktree.
-3. **Check** — runs one round of checks per PR: the verifier and the reviewers in parallel, each
-   answering PASS or FAIL. Every failure goes to the same builder once. There is no second round.
-4. **Advance** — marks the PR ready for human review and starts the next task, stacked on the
-   previous one if it isn't merged yet. For each task it lists what you have to validate: the
-   fixes made after the checks, which no agent checked, every failure left unfixed and every
-   note.
+1. **Plan**: agrees a goal, a "done when" check and what to ask you first, then splits the
+   feature into a few PR-sized tasks.
+2. **Build**: one builder per task, one at a time, each on its own branch, ending in a PR.
+3. **Check**: one round per PR. The verifier and reviewers answer PASS or FAIL; failures go back
+   to the builder once.
+4. **Advance**: the PR is ready for your review, with a list of what to validate, and the next
+   task starts, stacked if needed.
 
-Run the COO session itself on `fable` (`/model`): a skill cannot choose the model of the session
-that loads it. Every agent sets its own model and effort in its file.
-
-Everything it needs lives in the [`skills/coo/`](skills/coo/) bucket, which depends on no
-other bucket.
+Run the COO session on `fable` (`/model`); each agent sets its own model.
 
 ### Install the COO
 
-The COO has two parts: the skills in the `coo` bucket and the agents in
-[`skills/coo/agents/`](skills/coo/agents/). Install both the same way, either in a project or
-globally.
+The COO is the `coo` skills plus the agents in [`skills/coo/agents/`](skills/coo/agents/). The
+`skills` CLI installs the skills; the agents you copy from a clone of this repo.
 
-The `skills` CLI does not install or update agents, so you copy them yourself from a local copy
-of this repo. Each command that touches files comes twice: first for macOS and Linux (the
-Terminal's zsh or bash, and Git Bash on Windows), then for Windows PowerShell. The `npx`
-commands are the same everywhere.
+Install it in one of two places:
 
-Clone the repo once per computer:
+- **In a project**: needed for Claude Code on the web. Run the commands from the project's root
+  folder, then commit `.claude/` and `skills-lock.json`.
+- **Globally**: every project on this computer, but not cloud sessions. Run them from anywhere.
+
+#### macOS / Linux (Terminal)
+
+Once per computer:
 
 ```bash
 git clone --depth 1 https://github.com/pvgloria/skills ~/.cache/pvgloria-skills
 ```
 
+In a project:
+
+```bash
+npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/coo -s '*' --agent claude-code
+```
+
+```bash
+mkdir -p .claude/agents && cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md .claude/agents/
+```
+
+Globally:
+
+```bash
+npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/coo -g -s '*' --agent claude-code
+```
+
+```bash
+mkdir -p ~/.claude/agents && cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md ~/.claude/agents/
+```
+
+To update, pull the clone, run `npx skills update -p` (project) or `npx skills update -g`
+(global), and run the copy command again:
+
+```bash
+git -C ~/.cache/pvgloria-skills pull
+```
+
+#### Windows (PowerShell)
+
+Once per computer:
+
 ```powershell
 git clone --depth 1 https://github.com/pvgloria/skills "$HOME\.cache\pvgloria-skills"
 ```
 
-**In a project.** Use this if you work in Claude Code on the web: cloud sessions read skills and
-agents only from the project's repository, never from `~/.claude/`. From the project's root
-folder, copy the agents:
+In a project:
 
-```bash
-mkdir -p .claude/agents && cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md .claude/agents/
+```powershell
+npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/coo -s '*' --agent claude-code
 ```
 
 ```powershell
 New-Item -ItemType Directory -Force .claude\agents | Out-Null; Copy-Item "$HOME\.cache\pvgloria-skills\skills\coo\agents\*.md" .claude\agents\
 ```
 
-Then install the skills:
+Globally:
 
-```bash
-npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/coo -s '*' --agent claude-code
-```
-
-Commit `.claude/agents/`, `.claude/skills/` and `skills-lock.json`. Anyone who clones the
-project then has the COO, with nothing to install.
-
-**Globally.** Every project on your computer can use it, but cloud sessions cannot. Copy the
-agents:
-
-```bash
-mkdir -p ~/.claude/agents && cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md ~/.claude/agents/
+```powershell
+npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/coo -g -s '*' --agent claude-code
 ```
 
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\.claude\agents" | Out-Null; Copy-Item "$HOME\.cache\pvgloria-skills\skills\coo\agents\*.md" "$HOME\.claude\agents\"
 ```
 
-Then install the skills:
-
-```bash
-npx -y skills add https://github.com/pvgloria/skills/tree/main/skills/coo -g -s '*' --agent claude-code
-```
-
-**To update**, run `npx skills update -p` in the project (or `-g` for a global install) for the
-skills. For the agents, get the latest version of the repo:
-
-```bash
-git -C ~/.cache/pvgloria-skills pull
-```
+To update, pull the clone, run `npx skills update -p` (project) or `npx skills update -g`
+(global), and run the copy command again:
 
 ```powershell
 git -C "$HOME\.cache\pvgloria-skills" pull
 ```
 
-Then copy the agents again, into `.claude/agents/` in a project or `~/.claude/agents/` globally:
-
-```bash
-cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md .claude/agents/
-```
-
-```powershell
-Copy-Item "$HOME\.cache\pvgloria-skills\skills\coo\agents\*.md" .claude\agents\
-```
-
-Copying adds and replaces agents but never deletes one: when an agent is removed from this repo,
-delete its file from your `.claude/agents/` by hand.
+Copying never deletes: when an agent is removed from this repo, delete its file by hand.
 
 ### Agents
 
