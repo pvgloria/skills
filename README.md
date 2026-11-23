@@ -121,10 +121,17 @@ The COO has two parts: the skills in the `coo` bucket and the agents in
 globally.
 
 The `skills` CLI does not install or update agents, so you copy them yourself from a local copy
-of this repo. Clone it once per computer:
+of this repo. Each command that touches files comes twice: first for bash (macOS, Linux, Git
+Bash), then for Windows PowerShell. The `npx` commands are the same in both.
+
+Clone the repo once per computer:
 
 ```bash
 git clone --depth 1 https://github.com/pvgloria/skills ~/.cache/pvgloria-skills
+```
+
+```powershell
+git clone --depth 1 https://github.com/pvgloria/skills "$HOME\.cache\pvgloria-skills"
 ```
 
 **In a project.** Use this if you work in Claude Code on the web: cloud sessions read skills and
@@ -133,6 +140,10 @@ folder, copy the agents:
 
 ```bash
 mkdir -p .claude/agents && cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md .claude/agents/
+```
+
+```powershell
+New-Item -ItemType Directory -Force .claude\agents | Out-Null; Copy-Item "$HOME\.cache\pvgloria-skills\skills\coo\agents\*.md" .claude\agents\
 ```
 
 Then install the skills:
@@ -151,6 +162,10 @@ agents:
 mkdir -p ~/.claude/agents && cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md ~/.claude/agents/
 ```
 
+```powershell
+New-Item -ItemType Directory -Force "$HOME\.claude\agents" | Out-Null; Copy-Item "$HOME\.cache\pvgloria-skills\skills\coo\agents\*.md" "$HOME\.claude\agents\"
+```
+
 Then install the skills:
 
 ```bash
@@ -164,11 +179,22 @@ skills. For the agents, get the latest version of the repo:
 git -C ~/.cache/pvgloria-skills pull
 ```
 
+```powershell
+git -C "$HOME\.cache\pvgloria-skills" pull
+```
+
 Then copy the agents again, into `.claude/agents/` in a project or `~/.claude/agents/` globally:
 
 ```bash
 cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md .claude/agents/
 ```
+
+```powershell
+Copy-Item "$HOME\.cache\pvgloria-skills\skills\coo\agents\*.md" .claude\agents\
+```
+
+Copying adds and replaces agents but never deletes one: when an agent is removed from this repo,
+delete its file from your `.claude/agents/` by hand.
 
 ### Agents
 
