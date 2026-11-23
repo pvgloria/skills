@@ -121,8 +121,9 @@ The COO has two parts: the skills in the `coo` bucket and the agents in
 globally.
 
 The `skills` CLI does not install or update agents, so you copy them yourself from a local copy
-of this repo. Each command that touches files comes twice: first for bash (macOS, Linux, Git
-Bash), then for Windows PowerShell. The `npx` commands are the same in both.
+of this repo. Each command that touches files comes twice: first for macOS and Linux (the
+Terminal's zsh or bash, and Git Bash on Windows), then for Windows PowerShell. The `npx`
+commands are the same everywhere.
 
 Clone the repo once per computer:
 
