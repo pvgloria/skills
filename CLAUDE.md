@@ -13,7 +13,7 @@ skills/<bucket>/<skill>/SKILL.md
 | Bucket          | Meaning                              |
 | --------------- | ------------------------------------ |
 | `engineering/`  | daily code work                      |
-| `coo/`          | the `coo` orchestrator, its reviewer skills and agents |
+| `coo/`          | the `coo` orchestrator, its agents and review skills |
 | `productivity/` | daily non-code workflow tools        |
 | `misc/`         | kept around but rarely used          |
 | `personal/`     | tied to my own setup, not promoted   |
@@ -57,27 +57,29 @@ reviewers use, one Markdown file per agent.
 The repo is not a plugin, and the `skills` CLI does not install agents: they are copied into
 `~/.claude/agents/` or a project's `.claude/agents/`, with the commands in `README.md`.
 
-- **Naming.** Reviewer agents are `skills/coo/agents/reviewer-<area>.md`, with `name: reviewer-<area>` in
-  the frontmatter. Claude Code takes an agent's identity from `name`, not from the filename, so
-  keep the two equal. `coo` launches reviewers by these exact names.
-- **Agent body.** A reviewer agent's body holds only its role, its area, and the skills it
-  loads with what each one is for. Nothing else goes in the agent file.
-- **`skills` list.** `read-only-pr-review` first, then the agent's own `review-<area>` skill,
-  and nothing else.
-- **Shared skill.** `skills/coo/read-only-pr-review/SKILL.md` holds what every reviewer
-  shares: the review request, how to get the PR and read files at its head, the read-only limits,
-  and the reply format with the verdict rules. Change it there; never copy it into an agent.
-- **Review skills.** How to review one area lives in `skills/coo/review-<area>/SKILL.md`.
-  Both kinds of skill are placed and indexed like any other skill of the `coo` bucket.
+The team is `scout`, `builder`, `verifier` and the `reviewer-<area>` agents.
+
+- **Naming.** An agent's `name` in the frontmatter equals its filename without `.md`; reviewer
+  agents are `reviewer-<area>`. Claude Code takes an agent's identity from `name`, not from the
+  filename, so keep the two equal. `coo` launches agents by these exact names.
+- **Self-contained body.** An agent's body holds its whole contract, kept short: its role, where
+  it reads the change, its limits, and its exact reply format. There is no shared skill.
+- **Checks reply alike.** The verifier and every reviewer reply in the same format: `PASS` or
+  `FAIL`, a `Fail` list and a `Notes` list, or a single `Cannot check:` line. Review skills grade
+  each finding `fail` or `note`. Change the format in every check at once.
+- **Review skills.** How to review one area lives in `skills/coo/review-<area>/SKILL.md`, and the
+  `reviewer-<area>` agent preloads only that skill. Review skills are placed and indexed like any
+  other skill of the `coo` bucket.
 - **Self-contained pack.** An agent preloads only skills from the `coo` bucket. Knowledge a
   reviewer needs from another skill is written into its `review-<area>` skill.
-- **Black boxes.** Reviewer agents and review skills, the shared one included, do not mention
-  `coo`, an orchestrator, other agents or other skills. The only reference allowed is an agent
-  naming the skills it loads.
-- **Read-only.** Every reviewer agent sets `disallowedTools: Edit, Write, NotebookEdit, Agent`
-  and keeps Bash and the GitHub tools, which it needs to read the PR.
-- **Model and effort.** Every reviewer agent sets `model` and `effort` in its frontmatter, so it
-  never inherits the launching session's. The README's agents table shows both.
+- **Black boxes.** Agents and review skills do not mention `coo`, an orchestrator, other agents
+  or other skills. The only reference allowed is an agent naming the skill it loads.
+- **Tools.** Only the builder writes, and it keeps every tool. The others set `tools`: the scout
+  `Read, Grep, Glob`; the verifier `Read, Grep, Glob, Bash`, to run tests, changing no files or
+  git state; each reviewer `Read, Grep, Glob, Bash, Skill`, reading only.
+- **No worktrees.** Agents work in the repository folder they start in; none sets `isolation`.
+- **Model and effort.** Every agent sets `model` and `effort` in its frontmatter, so it never
+  inherits the launching session's. The README's agents table shows both.
 
 ### Where agents are listed
 

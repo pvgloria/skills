@@ -1,6 +1,6 @@
 ---
 name: review-edge-cases
-description: "How to review the edge cases of a pull request: check how the code the diff changes handles empty, null, boundary and large inputs, failures, cancellation and concurrent use, check whether the tests for those cases assert the behaviour, and grade each finding blocker, should-fix or nit. Use when checking whether a PR's changes cover their edge cases and do not break on them. Do NOT use when a person asks for a code review or for feedback on a diff."
+description: "How to review the edge cases of a pull request: check how the code the diff changes handles empty, null, boundary and large inputs, failures, cancellation and concurrent use, check whether the tests for those cases assert the behaviour, and grade each finding fail or note. Use when checking whether a PR's changes cover their edge cases and do not break on them. Do NOT use when a person asks for a code review or for feedback on a diff."
 ---
 
 # Review: edge cases
@@ -92,30 +92,30 @@ the code, only asserts nothing was thrown, or only verifies a mock was called do
 Async tests must control time (test dispatcher, virtual time, fake clock), not real `sleep` or
 `delay`. One test per distinct behaviour is enough.
 
-## Severity
+## Grading
 
 Grade a case by what happens in use, whether or not a test exists; a missing test is a separate
 finding.
 
-| Situation | Severity |
-|-----------|----------|
-| A reachable input or event crashes, hangs or deadlocks | `blocker` |
-| Stored or sent data is lost, corrupted or duplicated (half-done write, lost update, double submit) | `blocker` |
-| Cancellation swallowed, so cancelled work keeps running or writing | `blocker` |
-| Shared mutable state accessed concurrently with no synchronization | `blocker` |
-| Wrong result or recoverable stuck state (empty shown as loading, page off-by-one, stale response wins, flag never reset) | `should-fix` |
-| A failure dropped with no result, error or log | `should-fix` |
-| A cancellation reported as a failure (logged, shown or retried) | `should-fix` |
-| A resource or registration not released on an error or cancellation path | `should-fix` |
-| A case no current caller reaches but the public signature allows | `nit` |
-| A handled case with no test that drives it and asserts the outcome | `nit` |
-| A test that passes or fails by timing | `nit` |
+| Situation | Grade |
+|-----------|-------|
+| A reachable input or event crashes, hangs or deadlocks | `fail` |
+| Stored or sent data is lost, corrupted or duplicated (half-done write, lost update, double submit) | `fail` |
+| Cancellation swallowed, so cancelled work keeps running or writing | `fail` |
+| Shared mutable state accessed concurrently with no synchronization | `fail` |
+| Wrong result or recoverable stuck state (empty shown as loading, page off-by-one, stale response wins, flag never reset) | `fail` |
+| A failure dropped with no result, error or log | `fail` |
+| A cancellation reported as a failure (logged, shown or retried) | `fail` |
+| A resource or registration not released on an error or cancellation path | `fail` |
+| A case no current caller reaches but the public signature allows | `note` |
+| A handled case with no test that drives it and asserts the outcome | `note` |
+| A test that passes or fails by timing | `note` |
 
 ## Findings
 
 Name the case concretely and what goes wrong, at the line that breaks or where handling is
 missing:
 
-- `[blocker] app/src/main/java/orders/OrderSummary.kt:27 - maxBy throws NoSuchElementException for a new account, whose order list is empty`
-- `[blocker] app/src/main/java/sync/SyncPoller.kt:33 - the catch also traps CancellationException, so the loop never exits when the scope is cancelled`
-- `[should-fix] app/src/main/java/search/SearchViewModel.kt:52 - a slow response for an older query can arrive last and replace the newer results`
+- `app/src/main/java/orders/OrderSummary.kt:27 - maxBy throws NoSuchElementException for a new account, whose order list is empty`
+- `app/src/main/java/sync/SyncPoller.kt:33 - the catch also traps CancellationException, so the loop never exits when the scope is cancelled`
+- `app/src/main/java/search/SearchViewModel.kt:52 - a slow response for an older query can arrive last and replace the newer results`

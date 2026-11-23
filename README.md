@@ -10,7 +10,7 @@ what you install: point the CLI at one and you get its skills and nothing else.
 | `engineering` | Daily code work — [Engineering skills](#engineering-skills) |
 | `productivity` | Daily non-code workflow tools — [Productivity skills](#productivity-skills) |
 | `misc` | Kept around but rarely used — [Misc skills](#misc-skills) |
-| `coo` | The `coo` orchestrator and its reviewers — [COO](#coo) |
+| `coo` | The `coo` orchestrator and its agents — [COO](#coo) |
 | `personal` | Tied to my own setup — indexed in [`skills/personal/README.md`](skills/personal/README.md) |
 
 ## Install
@@ -93,30 +93,30 @@ npx skills list
 
 ## COO
 
-[`coo`](skills/coo/coo/SKILL.md) turns a Claude Code session into the Chief Operations Officer
-of one feature. It takes a PRD, ADR, document or prompt and builds it end to end without
-writing or reviewing code itself:
+[`coo`](skills/coo/coo/SKILL.md) turns a Claude Code session into the orchestrator of one
+feature. It plans, delegates and decides, and leaves searching, building and checking to a team
+of subagents:
 
-1. **Plan** — agrees the problem, goal and constraints with you, splits the feature into a
-   few PR-sized steps that group related user stories, and keeps the plan and its state in a
-   feature file.
-2. **Delegate** — hands each step to its own Claude Code implementer session, which ends with
-   a PR. Implementers run on Opus / medium, each on its own branch in the project's checkout,
-   never in a git worktree.
-3. **Review** — runs one review round per PR: launches the reviewer agents in parallel, waits
-   silently for all of them, and sends their blockers and should-fix findings to the same
-   implementer once. There is no second round.
-4. **Advance** — once the round is done and the implementer has pushed its fixes, marks the PR
-   ready for human review and starts the next step, stacked on the previous one if it isn't
-   merged yet. For each step it lists what you have to validate: the fixes made after the
-   review, which no agent checked, every finding left unfixed and every nit.
+1. **Plan** — agrees a goal, a "done when" check and what to ask you before, sends scouts to map
+   the code, and splits the feature into a few PR-sized tasks kept in a feature file.
+2. **Build** — hands each task to a builder, which ends with a PR. One builder works at a time,
+   each on its own branch in the project's checkout, never in a git worktree.
+3. **Check** — runs one round of checks per PR: the verifier and the reviewers in parallel, each
+   answering PASS or FAIL. Every failure goes to the same builder once. There is no second round.
+4. **Advance** — marks the PR ready for human review and starts the next task, stacked on the
+   previous one if it isn't merged yet. For each task it lists what you have to validate: the
+   fixes made after the checks, which no agent checked, every failure left unfixed and every
+   note.
+
+Run the COO session itself on `fable` (`/model`): a skill cannot choose the model of the session
+that loads it. Every agent sets its own model and effort in its file.
 
 Everything it needs lives in the [`skills/coo/`](skills/coo/) bucket, which depends on no
 other bucket.
 
 ### Install the COO
 
-The COO has two parts: the skills in the `coo` bucket and the reviewer agents in
+The COO has two parts: the skills in the `coo` bucket and the agents in
 [`skills/coo/agents/`](skills/coo/agents/). Install both the same way, either in a project or
 globally.
 
@@ -170,30 +170,26 @@ Then copy the agents again, into `.claude/agents/` in a project or `~/.claude/ag
 cp ~/.cache/pvgloria-skills/skills/coo/agents/*.md .claude/agents/
 ```
 
-### Reviewer agents
+### Agents
 
-Each reviewer is a Claude Code subagent that checks one area of a PR and never changes
-anything. Edge cases and acceptance run on every PR with code. If a PR has only documentation or
-images, only acceptance runs. Security and performance run only when the PR
-clearly touches their area.
+The scout, the verifier and the reviewers change nothing in the repository; the verifier only runs
+tests. The verifier and the reviewers all reply the same way: PASS or FAIL, what fails, and notes
+for human review. A reviewer preloads only its own `review-<area>` skill.
 
-Every agent loads two skills: `read-only-pr-review`, which they all share, and its own
-`review-<area>`. Each agent's file sets the model and effort it runs with.
-
-| Agent | Runs on | Area | Model / effort | Skills |
-|-------|---------|------|----------------|--------|
-| [`reviewer-acceptance`](skills/coo/agents/reviewer-acceptance.md) | Every PR | The PR does what the step asked, all of it and nothing more. | sonnet / high | `read-only-pr-review`, `review-acceptance` |
-| [`reviewer-edge-cases`](skills/coo/agents/reviewer-edge-cases.md) | Every PR with code | Edge cases: covered and not breaking. | sonnet / high | `read-only-pr-review`, `review-edge-cases` |
-| [`reviewer-security`](skills/coo/agents/reviewer-security.md) | When touched | Security: auth, secrets, untrusted input, network and TLS, sensitive data at rest, permissions. | sonnet / high | `read-only-pr-review`, `review-security` |
-| [`reviewer-performance`](skills/coo/agents/reviewer-performance.md) | When touched | Performance: hot paths, queries, large collections, rendering, startup. | sonnet / high | `read-only-pr-review`, `review-performance` |
+| Agent | Runs on | Job | Model / effort | Skills |
+|-------|---------|-----|----------------|--------|
+| [`scout`](skills/coo/agents/scout.md) | Any search or file reading | Finds the relevant files and lines; returns paths and short excerpts. | haiku / low | — |
+| [`builder`](skills/coo/agents/builder.md) | One task at a time | Builds one task on its own branch, runs its tests and opens its PR. | opus / medium | — |
+| [`verifier`](skills/coo/agents/verifier.md) | Every PR | Every acceptance criterion met, nothing outside the scope, the tests and the "done when" check pass. | sonnet / medium | — |
+| [`reviewer-edge-cases`](skills/coo/agents/reviewer-edge-cases.md) | Every PR with code | Edge cases: covered and not breaking. | sonnet / high | `review-edge-cases` |
+| [`reviewer-security`](skills/coo/agents/reviewer-security.md) | When touched | Security: auth, secrets, untrusted input, network and TLS, sensitive data at rest, permissions. | sonnet / high | `review-security` |
+| [`reviewer-performance`](skills/coo/agents/reviewer-performance.md) | When touched | Performance: hot paths, queries, large collections, rendering, startup. | sonnet / high | `review-performance` |
 
 ### COO skills
 
 | Skill | Description |
 |-------|-------------|
-| [`coo`](skills/coo/coo/SKILL.md) | Run a feature as a COO orchestrator — a few PR-sized steps, one review round each, reviewer agents gating the next step. |
-| [`read-only-pr-review`](skills/coo/read-only-pr-review/SKILL.md) | Review a PR without changing anything — get the diff, read files at the PR head, stay read-only, reply with a verdict and graded findings. Loaded by every reviewer agent. |
-| [`review-acceptance`](skills/coo/review-acceptance/SKILL.md) | Review a PR against its step — every acceptance criterion met, the goal delivered, nothing outside the scope. |
+| [`coo`](skills/coo/coo/SKILL.md) | Run a feature as a COO orchestrator — a few PR-sized tasks, a builder per task, one round of checks each. |
 | [`review-edge-cases`](skills/coo/review-edge-cases/SKILL.md) | Review a PR's edge cases — empty, null, boundary and large inputs, failures, cancellation, concurrency, and whether their tests assert the behaviour. |
 | [`review-performance`](skills/coo/review-performance/SKILL.md) | Review a PR's performance — work on hot paths, query count and shape, large collections, rendering and startup, and a measurement where a speed or memory claim needs one. |
 | [`review-security`](skills/coo/review-security/SKILL.md) | Review a PR's security — authentication and authorization on its entry points, secrets, untrusted input, network and TLS, sensitive data at rest, and permissions. |
