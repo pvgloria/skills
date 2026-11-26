@@ -41,6 +41,10 @@ substitute a generic agent.
 - `reviewer-performance` (sonnet): only for per-frame, per-item, per-request, startup or
   unbounded-loop code; database queries; image or large-file processing; rendering work.
 
+The model in brackets is part of the launch: pass it on every launch. If the user allows a
+stand-in for an agent that cannot run, launch the stand-in with that agent's model; it never
+inherits this session's model.
+
 Pick the checks from the task and the PR's changed files (`git diff --stat origin/<base>...<branch>`),
 without reading the diff.
 
@@ -51,11 +55,21 @@ without reading the diff.
    that touch the same code or only make sense together; they become the task's acceptance
    criteria. Split only when a PR would be too large to review, or a later task needs it
    reviewed first. Each task leaves the code working. Write the plan file, show it, and wait for
-   agreement.
-2. **Build.** One builder at a time, never in a git worktree. Its base is `main` if the previous
-   task is merged, otherwise that task's branch (stacked PR). Give it the task's section of the
-   plan, its branch and base, and the "Ask the user before" line. Answer its questions, or bring
-   them to the user, through SendMessage to the same builder. A report without a PR is not done.
+   agreement. The plan says how many tasks the goal takes. If a goal needs more than four, or
+   grows to twice the agreed number while building, stop and ask the user before going on.
+2. **Build.** One builder at a time, never in a git worktree. Each task gets a new builder: a
+   builder that finished a task is never given the next one, because every step it takes
+   re-reads all it did before. Its base is `main` if the previous task is merged, otherwise that
+   task's branch (stacked PR). Give it the task's section of the plan, its branch and base, the
+   "Ask the user before" line and the file cap. Answer its questions, or bring them to the user,
+   through SendMessage to the same builder. A report without a PR is not done.
+
+   The file cap is on the files the task changes by choice: 20, or the number the plan gives
+   that task with its reason (a type that many callers use cannot be changed in halves). Files a
+   changed signature forces (callers, tests, fixtures) do not count; the builder lists them apart
+   in its report. At the cap the builder stops at a point that compiles and passes, and reports
+   the rest, which becomes the next task. If no such point exists below the cap, it says so
+   before going past it, and you raise the cap or cut the task again.
 3. **Check, once.** Launch the task's checks in parallel, in one message, each with the task's
    section, its branch and base, and the "Done when" line. Nothing else: no instructions, no
    builder report, no other check's findings. Wait for all of them before writing anything. A
@@ -73,6 +87,8 @@ without reading the diff.
 6. **Record** every state change in the plan file.
 7. **Stop** only for a real blocker or an "Ask the user before" item. Report only at state
    changes, in a couple of lines, and bring anything that changes scope or order to the user.
+   While an agent works, write nothing: a turn that only says it is still waiting re-reads the
+   whole conversation for no news.
 
 When the last task is ready for human review, wrap up: each PR with its merge state and the order
 to merge stacked PRs, the decisions taken, the "For human review" lists, and anything left out.
